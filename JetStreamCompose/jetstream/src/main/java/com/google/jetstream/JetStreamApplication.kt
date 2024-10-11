@@ -17,13 +17,18 @@
 package com.google.jetstream
 
 import android.app.Application
+import androidx.room.Room
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.repositories.MovieRepositoryImpl
+import com.google.jetstream.data.room.AppDatabase
+import com.google.jetstream.data.room.dao.UserMovieProgressDao
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @HiltAndroidApp
 class JetStreamApplication : Application()
@@ -36,4 +41,24 @@ abstract class MovieRepositoryModule {
     abstract fun bindMovieRepository(
         movieRepositoryImpl: MovieRepositoryImpl
     ): MovieRepository
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseModule {
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(application: Application): AppDatabase {
+        return Room.databaseBuilder(
+            application,
+            AppDatabase::class.java,
+            "app_database"
+        ).build()
+    }
+
+    @Provides
+    fun provideUserMovieProgressDao(database: AppDatabase): UserMovieProgressDao {
+        return database.userMovieProgressDao()
+    }
 }
