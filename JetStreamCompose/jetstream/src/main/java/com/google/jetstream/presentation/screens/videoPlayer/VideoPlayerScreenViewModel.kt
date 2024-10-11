@@ -20,6 +20,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.Player
+import androidx.media3.exoplayer.ExoPlayer
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.repositories.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,9 +32,15 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class VideoPlayerScreenViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
-    repository: MovieRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: MovieRepository,
+    val player: ExoPlayer
 ) : ViewModel() {
+
+    init {
+        player.prepare()
+    }
+
     val uiState = savedStateHandle
         .getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null)
         .map { id ->
@@ -47,6 +55,11 @@ class VideoPlayerScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = VideoPlayerScreenUiState.Loading
         )
+
+    override fun onCleared() {
+        super.onCleared()
+        player.release()
+    }
 }
 
 @Immutable

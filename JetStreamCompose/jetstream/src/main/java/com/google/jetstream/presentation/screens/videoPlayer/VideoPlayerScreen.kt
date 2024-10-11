@@ -16,7 +16,6 @@
 
 package com.google.jetstream.presentation.screens.videoPlayer
 
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusable
@@ -45,11 +44,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.ui.PlayerView
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.util.StringConstants
@@ -69,8 +65,8 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
     const val MovieIdBundleKey = "movieId"
@@ -109,11 +105,11 @@ fun VideoPlayerScreen(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Unit) {
+    val viewModel = hiltViewModel<VideoPlayerScreenViewModel>()
     val context = LocalContext.current
     val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
 
-    // TODO: Move to ViewModel for better reuse
-    val exoPlayer = rememberExoPlayer(context)
+    val exoPlayer = viewModel.player
     LaunchedEffect(exoPlayer, movieDetails) {
         exoPlayer.setMediaItem(
             MediaItem.Builder()
@@ -262,23 +258,6 @@ fun VideoPlayerControls(
         },
         more = null
     )
-}
-
-@androidx.annotation.OptIn(UnstableApi::class)
-@Composable
-private fun rememberExoPlayer(context: Context) = remember {
-    ExoPlayer.Builder(context)
-        .setSeekForwardIncrementMs(10)
-        .setSeekBackIncrementMs(10)
-        .setMediaSourceFactory(
-            ProgressiveMediaSource.Factory(DefaultDataSource.Factory(context))
-        )
-        .setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
-        .build()
-        .apply {
-            playWhenReady = true
-            repeatMode = Player.REPEAT_MODE_ONE
-        }
 }
 
 private fun Modifier.dPadEvents(
