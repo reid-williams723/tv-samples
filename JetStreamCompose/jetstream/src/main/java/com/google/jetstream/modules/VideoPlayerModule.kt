@@ -23,8 +23,8 @@ object VideoPlayerModule {
     @ViewModelScoped
     fun provideVideoPlayer(app: Application): ExoPlayer {
         return ExoPlayer.Builder(app)
-            .setSeekForwardIncrementMs(10)
-            .setSeekBackIncrementMs(10)
+//            .setSeekForwardIncrementMs(10)
+//            .setSeekBackIncrementMs(10)
             .setMediaSourceFactory(
                 ProgressiveMediaSource.Factory(DefaultDataSource.Factory(app))
             )

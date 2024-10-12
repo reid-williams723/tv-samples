@@ -78,7 +78,10 @@ fun Modifier.handleDPadKeyEvents(
     onRight: (() -> Unit)? = null,
     onUp: (() -> Unit)? = null,
     onDown: (() -> Unit)? = null,
-    onEnter: (() -> Unit)? = null
+    onEnter: (() -> Unit)? = null,
+    onFastForward: (() -> Unit)? = null,
+    onRewind: (() -> Unit)? = null,
+    onPlayPause: (() -> Unit)? = null
 ) = onKeyEvent {
 
     if (it.nativeKeyEvent.action == KeyEvent.ACTION_UP) {
@@ -101,6 +104,17 @@ fun Modifier.handleDPadKeyEvents(
 
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER, KeyEvent.KEYCODE_NUMPAD_ENTER -> {
                 onEnter?.invoke().also { return@onKeyEvent true }
+            }
+            KeyEvent.KEYCODE_MEDIA_FAST_FORWARD, KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD -> {
+                onFastForward?.invoke().also { return@onKeyEvent true }
+            }
+
+            KeyEvent.KEYCODE_MEDIA_REWIND, KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD -> {
+                onRewind?.invoke().also { return@onKeyEvent true }
+            }
+
+            KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> {
+                onPlayPause?.invoke().also { return@onKeyEvent true }
             }
         }
     }

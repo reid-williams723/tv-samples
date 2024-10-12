@@ -90,9 +90,11 @@ fun VideoPlayerScreen(
         is VideoPlayerScreenUiState.Loading -> {
             Loading(modifier = Modifier.fillMaxSize())
         }
+
         is VideoPlayerScreenUiState.Error -> {
             Error(modifier = Modifier.fillMaxSize())
         }
+
         is VideoPlayerScreenUiState.Done -> {
             VideoPlayerScreenContent(
                 movieDetails = s.movieDetails,
@@ -277,10 +279,29 @@ private fun Modifier.dPadEvents(
             pulseState.setType(FORWARD)
         }
     },
+    onFastForward = {
+        exoPlayer.seekForward()
+        pulseState.setType(FORWARD)
+        videoPlayerState.showControls()
+    },
+    onRewind = {
+        exoPlayer.seekBack()
+        pulseState.setType(BACK)
+        videoPlayerState.showControls()
+    },
     onUp = { videoPlayerState.showControls() },
     onDown = { videoPlayerState.showControls() },
     onEnter = {
         exoPlayer.pause()
         videoPlayerState.showControls()
+    },
+    onPlayPause = {
+        if (exoPlayer.isPlaying){
+            exoPlayer.pause()
+            videoPlayerState.showControls()
+        } else {
+            exoPlayer.play()
+            videoPlayerState.showControls()
+        }
     }
 )
