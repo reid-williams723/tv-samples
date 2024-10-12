@@ -64,7 +64,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MovieDetails(
     movieDetails: MovieDetails,
-    goToMoviePlayer: () -> Unit
+    goToMoviePlayer: (movieId: String) -> Unit
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -113,7 +113,8 @@ fun MovieDetails(
                             coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
                         }
                     },
-                    goToMoviePlayer = goToMoviePlayer
+                    goToMoviePlayer = { goToMoviePlayer(movieDetails.id) },
+                    movieDetails = movieDetails
                 )
             }
         }
@@ -123,10 +124,11 @@ fun MovieDetails(
 @Composable
 private fun WatchTrailerButton(
     modifier: Modifier = Modifier,
-    goToMoviePlayer: () -> Unit
+    goToMoviePlayer: (movieId: String) -> Unit,
+    movieDetails: MovieDetails
 ) {
     Button(
-        onClick = goToMoviePlayer,
+        onClick = { goToMoviePlayer(movieDetails.id) },
         modifier = modifier.padding(top = 24.dp),
         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         shape = ButtonDefaults.shape(shape = JetStreamButtonShape)

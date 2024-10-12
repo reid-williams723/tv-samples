@@ -111,25 +111,7 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
 
     val exoPlayer = viewModel.player
     LaunchedEffect(exoPlayer, movieDetails) {
-        exoPlayer.setMediaItem(
-            MediaItem.Builder()
-                .setUri(movieDetails.videoUri)
-                .setSubtitleConfigurations(
-                    if (movieDetails.subtitleUri == null) {
-                        emptyList()
-                    } else {
-                        listOf(
-                            MediaItem.SubtitleConfiguration
-                                .Builder(Uri.parse(movieDetails.subtitleUri))
-                                .setMimeType("application/vtt")
-                                .setLanguage("en")
-                                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                                .build()
-                        )
-                    }
-                ).build()
-        )
-        exoPlayer.prepare()
+        viewModel.playVideo(movieDetails)
     }
 
     var contentCurrentPosition by remember { mutableLongStateOf(0L) }

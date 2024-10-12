@@ -16,10 +16,13 @@
 
 package com.google.jetstream.presentation.screens.videoPlayer
 
+import android.net.Uri
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.jetstream.data.entities.MovieDetails
@@ -32,8 +35,8 @@ import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class VideoPlayerScreenViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    private val repository: MovieRepository,
+    savedStateHandle: SavedStateHandle,
+    repository: MovieRepository,
     val player: ExoPlayer
 ) : ViewModel() {
 
@@ -55,6 +58,27 @@ class VideoPlayerScreenViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = VideoPlayerScreenUiState.Loading
         )
+
+    fun playVideo(movieDetails: MovieDetails) {
+        player.setMediaItem(
+            MediaItem.Builder()
+                .setUri(movieDetails.videoUri)
+                .setSubtitleConfigurations(
+                    if (movieDetails.subtitleUri == null) {
+                        emptyList()
+                    } else {
+                        listOf(
+                            MediaItem.SubtitleConfiguration
+                                .Builder(Uri.parse(movieDetails.subtitleUri))
+                                .setMimeType("application/vtt")
+                                .setLanguage("en")
+                                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                                .build()
+                        )
+                    }
+                ).build()
+        )
+    }
 
     override fun onCleared() {
         super.onCleared()

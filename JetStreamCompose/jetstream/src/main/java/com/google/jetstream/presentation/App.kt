@@ -74,8 +74,8 @@ fun App(
                 )
             ) {
                 MovieDetailsScreen(
-                    goToMoviePlayer = {
-                        navController.navigate(Screens.VideoPlayer())
+                    goToMoviePlayer = { movieId ->
+                        navController.navigate(Screens.VideoPlayer.withArgs(movieId))
                     },
                     refreshScreenWithNewMovie = { movie ->
                         navController.navigate(
@@ -115,7 +115,13 @@ fun App(
                     }
                 )
             }
-            composable(route = Screens.VideoPlayer()) {
+            composable(route = Screens.VideoPlayer(),
+                arguments = listOf(
+                    navArgument(VideoPlayerScreen.MovieIdBundleKey) {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
                 VideoPlayerScreen(
                     onBackPressed = {
                         if (navController.navigateUp()) {
