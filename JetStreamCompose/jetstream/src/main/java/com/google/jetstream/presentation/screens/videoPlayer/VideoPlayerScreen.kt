@@ -17,11 +17,16 @@
 package com.google.jetstream.presentation.screens.videoPlayer
 
 import android.net.Uri
+import android.view.View
 import androidx.activity.compose.BackHandler
+import androidx.annotation.OptIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesomeMotion
@@ -33,20 +38,34 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.Player
+import androidx.media3.common.text.Cue
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerView
+import androidx.media3.ui.SubtitleView
+import androidx.tv.material3.Text
+import com.google.jetstream.R
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Error
@@ -64,8 +83,12 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
+import com.google.jetstream.presentation.theme.Typography
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
@@ -111,32 +134,46 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
     val context = LocalContext.current
     val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
 
-    val exoPlayer = viewModel.player
-    LaunchedEffect(exoPlayer, movieDetails) {
-        exoPlayer.setMediaItem(
-            MediaItem.Builder()
-                .setUri(movieDetails.videoUri)
+    var subtitleText by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
+
+    var subtitlesVisible by remember { mutableStateOf(true) }
+
+    // Initialize ExoPlayer
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            val mediaItem = MediaItem.Builder()
+                .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv")))
                 .setSubtitleConfigurations(
-                    if (movieDetails.subtitleUri == null) {
-                        emptyList()
-                    } else {
-                        listOf(
-                            MediaItem.SubtitleConfiguration
-                                .Builder(Uri.parse(movieDetails.subtitleUri))
-                                .setMimeType("application/vtt")
-                                .setLanguage("en")
-                                .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                                .build()
-                        )
-                    }
+                    listOf(
+                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt")))
+                            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+                            .setLanguage("en")
+                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                            .build()
+                    )
                 ).build()
-        )
-        exoPlayer.prepare()
+
+            setMediaItem(mediaItem)
+            prepare()
+            playWhenReady = true
+
+            // Add a listener for subtitles using the new onCues() method
+            addListener(object : Player.Listener {
+                override fun onCues(cues: List<Cue>) {
+                    // Update subtitle text when new cues are received
+                    scope.launch(Dispatchers.Main) {
+                        subtitleText = cues.joinToString("\n") { it.text.toString() }
+                    }
+                }
+            })
+        }
     }
+
 
     var contentCurrentPosition by remember { mutableLongStateOf(0L) }
     var isPlaying: Boolean by remember { mutableStateOf(exoPlayer.isPlaying) }
-    // TODO: Update in a more thoughtful manner
+
     LaunchedEffect(Unit) {
         while (true) {
             delay(300)
@@ -144,6 +181,7 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
             isPlaying = exoPlayer.isPlaying
         }
     }
+
 
     BackHandler(onBack = onBackPressed)
 
@@ -160,10 +198,25 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
     ) {
         AndroidView(
             factory = {
-                PlayerView(context).apply { useController = false }
+                PlayerView(context).apply {
+                    useController = false
+                    subtitleView?.apply {
+                        // Set the style for the subtitle
+                        updateSubtitleVisibility(subtitlesVisible)
+
+                        setFractionalTextSize(0.04f)
+                        setBottomPaddingFraction(0.15f)  // Move subtitles up by 15% of the screen height
+                    }
+                }
             },
-            update = { it.player = exoPlayer },
-            onRelease = { exoPlayer.release() }
+            update = {
+                it.player = exoPlayer
+                it.subtitleView?.updateSubtitleVisibility(subtitlesVisible)
+            },
+            onRelease = { exoPlayer.release() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(4 / 3f)
         )
 
         val focusRequester = remember { FocusRequester() }
@@ -173,7 +226,7 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
             state = videoPlayerState,
             isPlaying = isPlaying,
             centerButton = { VideoPlayerPulse(pulseState) },
-            subtitles = { /* TODO Implement subtitles */ },
+            subtitles = {},
             controls = {
                 VideoPlayerControls(
                     movieDetails,
@@ -181,10 +234,33 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
                     contentCurrentPosition,
                     exoPlayer,
                     videoPlayerState,
-                    focusRequester
+                    focusRequester,
+                    {
+                        subtitlesVisible = !subtitlesVisible
+                    }
                 )
             }
         )
+    }
+}
+
+@Composable
+fun SubtitleOverlay(subtitleText: String, modifier: Modifier = Modifier) {
+    if (subtitleText.isNotEmpty()) {
+        Box(
+            modifier = modifier
+                .padding(16.dp)
+                .background(Color.Black.copy(alpha = 0.7f)), // Black background with some transparency
+            contentAlignment = Alignment.Center // Center the text
+        ) {
+            Text(
+                text = subtitleText,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(8.dp) // Padding for the text
+            )
+        }
     }
 }
 
@@ -195,7 +271,8 @@ fun VideoPlayerControls(
     contentCurrentPosition: Long,
     exoPlayer: ExoPlayer,
     state: VideoPlayerState,
-    focusRequester: FocusRequester
+    focusRequester: FocusRequester,
+    toggleSubtitles: () -> Unit
 ) {
     val onPlayPauseToggle = { shouldPlay: Boolean ->
         if (shouldPlay) {
@@ -234,7 +311,10 @@ fun VideoPlayerControls(
                     isPlaying = isPlaying,
                     contentDescription = StringConstants
                         .Composable
-                        .VideoPlayerControlClosedCaptionsButton
+                        .VideoPlayerControlClosedCaptionsButton,
+                    onClick = {
+                        toggleSubtitles()
+                    }
                 )
                 VideoPlayerControlsIcon(
                     modifier = Modifier.padding(start = 12.dp),
@@ -296,7 +376,7 @@ private fun Modifier.dPadEvents(
         videoPlayerState.showControls()
     },
     onPlayPause = {
-        if (exoPlayer.isPlaying){
+        if (exoPlayer.isPlaying) {
             exoPlayer.pause()
             videoPlayerState.showControls()
         } else {
@@ -305,3 +385,35 @@ private fun Modifier.dPadEvents(
         }
     }
 )
+
+// Extension function to update subtitle visibility
+@OptIn(UnstableApi::class)
+fun SubtitleView.updateSubtitleVisibility(isVisible: Boolean) {
+    if (isVisible) {
+        setStyle(
+            CaptionStyleCompat(
+                Color.White.toArgb(),  // Foreground text color from Compose
+                Color.Black.copy(alpha = 0.5f)
+                    .toArgb(),  // Background color from Compose
+                Color.Transparent.toArgb(),  // Window color (transparent)
+                CaptionStyleCompat.EDGE_TYPE_OUTLINE,  // Text outline
+                Color.Black.toArgb(),  // Outline color from Compose
+                ResourcesCompat.getFont(
+                    context,
+                    R.font.inter_regular
+                ) // Custom typeface (can be set to null for default)
+            )
+        )
+    } else {
+        setStyle(
+            CaptionStyleCompat(
+                Color.Transparent.toArgb(),  // Hide text by making it transparent
+                Color.Transparent.toArgb(),  // Hide background
+                CaptionStyleCompat.EDGE_TYPE_NONE,
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb(),
+                null
+            )
+        )
+    }
+}
