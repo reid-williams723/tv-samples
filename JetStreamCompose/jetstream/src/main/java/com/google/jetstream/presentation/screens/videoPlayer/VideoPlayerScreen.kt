@@ -16,8 +16,6 @@
 
 package com.google.jetstream.presentation.screens.videoPlayer
 
-import android.net.Uri
-import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
@@ -33,13 +31,9 @@ import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -53,14 +47,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.media3.common.C
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MimeTypes
-import androidx.media3.common.Player
-import androidx.media3.common.text.Cue
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.ui.CaptionStyleCompat
 import androidx.media3.ui.PlayerView
 import androidx.media3.ui.SubtitleView
@@ -83,12 +71,7 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
-import com.google.jetstream.presentation.theme.Typography
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.io.File
 import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
@@ -130,62 +113,22 @@ fun VideoPlayerScreen(
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Unit) {
+
     val viewModel = hiltViewModel<VideoPlayerScreenViewModel>()
     val context = LocalContext.current
-    val videoPlayerState = rememberVideoPlayerState(hideSeconds = 4)
+    val isPlaying by viewModel.isPlaying.collectAsState()
+    val currentPosition by viewModel.currentPosition.collectAsState()
+    val subtitlesVisible by viewModel.subtitlesVisible.collectAsState()
 
-    var subtitleText by remember { mutableStateOf("") }
-    val scope = rememberCoroutineScope()
+    val videoPlayerState = rememberVideoPlayerState()
+    val pulseState = rememberVideoPlayerPulseState()
 
-    var subtitlesVisible by remember { mutableStateOf(true) }
+    val isControlsVisible = videoPlayerState.controlsVisible
 
-    // Initialize ExoPlayer
-    val exoPlayer = remember {
-        ExoPlayer.Builder(context).build().apply {
-            val mediaItem = MediaItem.Builder()
-                .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv")))
-                .setSubtitleConfigurations(
-                    listOf(
-                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt")))
-                            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
-                            .setLanguage("en")
-                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                            .build()
-                    )
-                ).build()
-
-            setMediaItem(mediaItem)
-            prepare()
-            playWhenReady = true
-
-            // Add a listener for subtitles using the new onCues() method
-            addListener(object : Player.Listener {
-                override fun onCues(cues: List<Cue>) {
-                    // Update subtitle text when new cues are received
-                    scope.launch(Dispatchers.Main) {
-                        subtitleText = cues.joinToString("\n") { it.text.toString() }
-                    }
-                }
-            })
-        }
-    }
-
-
-    var contentCurrentPosition by remember { mutableLongStateOf(0L) }
-    var isPlaying: Boolean by remember { mutableStateOf(exoPlayer.isPlaying) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(300)
-            contentCurrentPosition = exoPlayer.currentPosition
-            isPlaying = exoPlayer.isPlaying
-        }
-    }
-
+    val exoPlayer = viewModel.player
 
     BackHandler(onBack = onBackPressed)
 
-    val pulseState = rememberVideoPlayerPulseState()
 
     Box(
         Modifier
@@ -226,18 +169,16 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
             state = videoPlayerState,
             isPlaying = isPlaying,
             centerButton = { VideoPlayerPulse(pulseState) },
-            subtitles = {},
+            subtitles = { },
             controls = {
                 VideoPlayerControls(
                     movieDetails,
                     isPlaying,
-                    contentCurrentPosition,
+                    currentPosition,
                     exoPlayer,
                     videoPlayerState,
                     focusRequester,
-                    {
-                        subtitlesVisible = !subtitlesVisible
-                    }
+                    { viewModel.toggleSubtitlesVisibility() }
                 )
             }
         )
