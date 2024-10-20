@@ -18,16 +18,13 @@ package com.google.jetstream
 
 import android.app.Application
 import androidx.annotation.OptIn
-import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.room.Room
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.repositories.MovieRepositoryImpl
 import com.google.jetstream.data.room.AppDatabase
-import com.google.jetstream.data.room.dao.UserMovieProgressDao
+import com.google.jetstream.data.room.dao.MovieProgressDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -62,12 +59,13 @@ object DatabaseModule {
             application,
             AppDatabase::class.java,
             "app_database"
-        ).build()
+        ).fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
-    fun provideUserMovieProgressDao(database: AppDatabase): UserMovieProgressDao {
-        return database.userMovieProgressDao()
+    fun provideMovieProgressDao(database: AppDatabase): MovieProgressDao {
+        return database.movieProgressDao()
     }
 }
 

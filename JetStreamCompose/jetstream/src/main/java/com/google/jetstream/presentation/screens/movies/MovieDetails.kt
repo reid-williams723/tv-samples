@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
@@ -63,8 +64,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MovieDetails(
+    goToMoviePlayerBegin: () -> Unit,
+    goToMoviePlayerResume: () -> Unit,
     movieDetails: MovieDetails,
-    goToMoviePlayer: () -> Unit
+    currentMovieProgress: Long = 0,
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -107,16 +110,52 @@ fun MovieDetails(
                         music = movieDetails.music
                     )
                 }
-                WatchTrailerButton(
-                    modifier = Modifier.onFocusChanged {
-                        if (it.isFocused) {
-                            coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
-                        }
-                    },
-                    goToMoviePlayer = goToMoviePlayer
-                )
+                Row() { // Add padding to the Row
+                    if (currentMovieProgress > 0) {
+                        ContinueWatchingButton(
+                            modifier = Modifier.onFocusChanged {
+                                if (it.isFocused) {
+                                    coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                                }
+                            },
+                            goToMoviePlayer = goToMoviePlayerResume
+                        )
+                        Spacer(modifier = Modifier.width(16.dp)) // Add horizontal padding
+                    }
+                    WatchTrailerButton(
+                        modifier = Modifier.onFocusChanged {
+                            if (it.isFocused) {
+                                coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                            }
+                        },
+                        goToMoviePlayer = goToMoviePlayerBegin
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ContinueWatchingButton(
+    modifier: Modifier = Modifier,
+    goToMoviePlayer: () -> Unit
+) {
+    Button(
+        onClick = goToMoviePlayer,
+        modifier = modifier.padding(top = 24.dp),
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+        shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.PlayArrow,
+            contentDescription = null
+        )
+        Spacer(Modifier.size(8.dp))
+        Text(
+            text = stringResource(R.string.continue_watching),
+            style = MaterialTheme.typography.titleSmall
+        )
     }
 }
 
@@ -137,7 +176,7 @@ private fun WatchTrailerButton(
         )
         Spacer(Modifier.size(8.dp))
         Text(
-            text = stringResource(R.string.watch_trailer),
+            text = stringResource(R.string.watch_now),
             style = MaterialTheme.typography.titleSmall
         )
     }

@@ -19,39 +19,30 @@ package com.google.jetstream.presentation.screens.videoPlayer
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.annotation.OptIn
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
-import androidx.media3.common.Player
-import androidx.media3.common.text.Cue
-import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.repositories.MovieRepository
-import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerPulse
-import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerPulseState
-import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerState
+import com.google.jetstream.data.room.dao.MovieProgressDao
+import com.google.jetstream.data.room.entities.MovieProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
+import javax.inject.Inject
 
 @UnstableApi
 @HiltViewModel
@@ -59,7 +50,8 @@ class VideoPlayerScreenViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: MovieRepository,
     @ApplicationContext context: Context,
-    val player: ExoPlayer
+    val player: ExoPlayer,
+    val movieProgressDao: MovieProgressDao
 ) : ViewModel() {
 
     init {
@@ -78,12 +70,20 @@ class VideoPlayerScreenViewModel @Inject constructor(
 
     val uiState = savedStateHandle
         .getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null)
-        .map { id ->
-            if (id == null) {
+        .combine(
+            savedStateHandle.getStateFlow<Boolean?>(
+                VideoPlayerScreen.StartFromBeginningKey,
+                null
+            )
+        ) { id, startFromBeginning ->
+            if (id == null || startFromBeginning == null) {
                 VideoPlayerScreenUiState.Error
             } else {
                 val details = repository.getMovieDetails(movieId = id)
-                VideoPlayerScreenUiState.Done(movieDetails = details)
+                VideoPlayerScreenUiState.Done(
+                    movieDetails = details,
+                    startFromBeginning = startFromBeginning
+                )
             }
         }.stateIn(
             scope = viewModelScope,
@@ -96,27 +96,33 @@ class VideoPlayerScreenViewModel @Inject constructor(
         _subtitlesVisible.value = !_subtitlesVisible.value
     }
 
-    fun playVideo(movieDetails: MovieDetails) {
-        // Set up ExoPlayer with media item and subtitles
-        val mediaItem = MediaItem.Builder()
-            .setUri(Uri.fromFile(File(movieDetails.videoUri)))
-            .setSubtitleConfigurations(
-                listOf(
-                    MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(movieDetails.subtitleUri?.let {
-                        File(
-                            it
-                        )
-                    }))
-                        .setMimeType(MimeTypes.APPLICATION_SUBRIP)
-                        .setLanguage("en")
-                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                        .build()
-                )
-            ).build()
+    fun playVideo(movieDetails: MovieDetails, startFromBeginning: Boolean) {
+        viewModelScope.launch {
+            // Set up ExoPlayer with media item and subtitles
+            val mediaItem = MediaItem.Builder()
+                .setUri(Uri.fromFile(File(movieDetails.videoUri)))
+                .setSubtitleConfigurations(
+                    listOf(
+                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(movieDetails.subtitleUri?.let {
+                            File(
+                                it
+                            )
+                        }))
+                            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+                            .setLanguage("en")
+                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                            .build()
+                    )
+                ).build()
 
-        player.setMediaItem(mediaItem)
-        player.seekTo(3600000 + 1140000+ 600000)
-        player.play()
+            val movieProgress = movieProgressDao.getMovieProgress(movieDetails.id)
+
+            player.setMediaItem(mediaItem)
+            if (movieProgress != null && !startFromBeginning) {
+                player.seekTo(movieProgress)
+            }
+            player.play()
+        }
     }
 
     private fun trackPlayerPosition() {
@@ -126,6 +132,13 @@ class VideoPlayerScreenViewModel @Inject constructor(
                 _currentPosition.value = player.currentPosition
                 _isPlaying.value = player.isPlaying
             }
+        }
+    }
+
+    fun saveCurrentPosition(movieDetails: MovieDetails, progress: Long) {
+        viewModelScope.launch {
+            Log.d("VideoPlayerScreenViewModel", "Saving current position: $progress")
+            movieProgressDao.upsertMovieProgress(MovieProgress(movieDetails.id, progress))
         }
     }
 
@@ -140,5 +153,6 @@ class VideoPlayerScreenViewModel @Inject constructor(
 sealed class VideoPlayerScreenUiState {
     object Loading : VideoPlayerScreenUiState()
     object Error : VideoPlayerScreenUiState()
-    data class Done(val movieDetails: MovieDetails) : VideoPlayerScreenUiState()
+    data class Done(val movieDetails: MovieDetails, val startFromBeginning: Boolean) :
+        VideoPlayerScreenUiState()
 }

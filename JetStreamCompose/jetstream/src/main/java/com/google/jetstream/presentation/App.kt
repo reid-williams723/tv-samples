@@ -74,8 +74,15 @@ fun App(
                 )
             ) {
                 MovieDetailsScreen(
-                    goToMoviePlayer = {
-                        navController.navigate(Screens.VideoPlayer())
+                    goToMoviePlayerBegin = { movieId, startFromBeginning ->
+                        navController.navigate(
+                            Screens.VideoPlayer.withArgs(movieId, startFromBeginning)
+                        )
+                    },
+                    goToMoviePlayerResume = { movieId, startFromBeginning ->
+                        navController.navigate(
+                            Screens.VideoPlayer.withArgs(movieId, startFromBeginning)
+                        )
                     },
                     refreshScreenWithNewMovie = { movie ->
                         navController.navigate(
@@ -115,8 +122,25 @@ fun App(
                     }
                 )
             }
-            composable(route = Screens.VideoPlayer()) {
+            composable(route = Screens.VideoPlayer(),
+                arguments = listOf(
+                    navArgument(VideoPlayerScreen.MovieIdBundleKey) {
+                        type = NavType.StringType
+                    },
+                    navArgument(VideoPlayerScreen.StartFromBeginningKey) {
+                        type = NavType.BoolType
+                    }
+                )
+            ) {
+                val movieId = it.arguments?.getString(VideoPlayerScreen.MovieIdBundleKey)
+                val startFromBeginning =
+                    it.arguments?.getBoolean(VideoPlayerScreen.StartFromBeginningKey)
+                if (movieId == null || startFromBeginning == null) {
+                    return@composable
+                }
                 VideoPlayerScreen(
+                    movieId = movieId,
+                    startFromBeginning = startFromBeginning,
                     onBackPressed = {
                         if (navController.navigateUp()) {
                             isComingBackFromDifferentScreen = true

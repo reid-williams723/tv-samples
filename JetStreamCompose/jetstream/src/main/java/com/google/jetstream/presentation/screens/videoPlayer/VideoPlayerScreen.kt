@@ -85,6 +85,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
     const val MovieIdBundleKey = "movieId"
+    const val StartFromBeginningKey = "startFromBeginning"
 }
 
 /**
@@ -96,6 +97,8 @@ object VideoPlayerScreen {
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreen(
+    movieId: String,
+    startFromBeginning: Boolean,
     onBackPressed: () -> Unit,
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {
@@ -114,6 +117,7 @@ fun VideoPlayerScreen(
         is VideoPlayerScreenUiState.Done -> {
             VideoPlayerScreenContent(
                 movieDetails = s.movieDetails,
+                startFromBeginning = s.startFromBeginning,
                 onBackPressed = onBackPressed
             )
         }
@@ -122,7 +126,10 @@ fun VideoPlayerScreen(
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
-fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Unit) {
+fun VideoPlayerScreenContent(
+    movieDetails: MovieDetails,
+    startFromBeginning: Boolean = false,
+    onBackPressed: () -> Unit) {
 
     val viewModel = hiltViewModel<VideoPlayerScreenViewModel>()
     val context = LocalContext.current
@@ -153,7 +160,10 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
         }
     }
 
-    BackHandler(onBack = onBackPressed)
+    BackHandler(onBack = {
+        viewModel.saveCurrentPosition(movieDetails, currentPosition)
+        onBackPressed()
+    })
 
 
     Box(
@@ -184,11 +194,12 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
                 it.subtitleView?.updateSubtitleVisibility(subtitlesVisible)
                 when (lifecycle) {
                     Lifecycle.Event.ON_CREATE -> {
-                        viewModel.playVideo(movieDetails)
+                        viewModel.playVideo(movieDetails, startFromBeginning)
                         Log.d("VideoPlayerScreen", "Lifecycle.Event.ON_CREATE")
                     }
 
                     Lifecycle.Event.ON_PAUSE -> {
+                        viewModel.saveCurrentPosition(movieDetails, currentPosition)
                         it.onPause()
                         it.player?.pause()
                     }
