@@ -17,6 +17,12 @@
 package com.google.jetstream
 
 import android.app.Application
+import androidx.annotation.OptIn
+import androidx.media3.common.C
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.room.Room
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.repositories.MovieRepositoryImpl
@@ -27,6 +33,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.HiltAndroidApp
+import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -60,5 +68,18 @@ object DatabaseModule {
     @Provides
     fun provideUserMovieProgressDao(database: AppDatabase): UserMovieProgressDao {
         return database.userMovieProgressDao()
+    }
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+object VideoPlayerModule {
+
+    @OptIn(UnstableApi::class)
+    @Provides
+    @ViewModelScoped
+    fun provideVideoPlayer(application: Application): ExoPlayer {
+        return ExoPlayer.Builder(application)
+            .build()
     }
 }

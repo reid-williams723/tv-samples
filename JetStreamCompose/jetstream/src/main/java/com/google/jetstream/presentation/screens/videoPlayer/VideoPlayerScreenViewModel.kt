@@ -18,6 +18,7 @@ package com.google.jetstream.presentation.screens.videoPlayer
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -57,8 +58,14 @@ import java.io.File
 class VideoPlayerScreenViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: MovieRepository,
-    @ApplicationContext context: Context
+    @ApplicationContext context: Context,
+    val player: ExoPlayer
 ) : ViewModel() {
+
+    init {
+        player.prepare()
+        trackPlayerPosition()
+    }
 
     private val _isPlaying = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying
@@ -69,8 +76,6 @@ class VideoPlayerScreenViewModel @Inject constructor(
     private val _subtitlesVisible = MutableStateFlow(true)
     val subtitlesVisible: StateFlow<Boolean> = _subtitlesVisible
 
-    var player = ExoPlayer.Builder(context).build()
-
     val uiState = savedStateHandle
         .getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null)
         .map { id ->
@@ -78,7 +83,6 @@ class VideoPlayerScreenViewModel @Inject constructor(
                 VideoPlayerScreenUiState.Error
             } else {
                 val details = repository.getMovieDetails(movieId = id)
-                player = initializePlayer(context, details)
                 VideoPlayerScreenUiState.Done(movieDetails = details)
             }
         }.stateIn(
@@ -87,34 +91,35 @@ class VideoPlayerScreenViewModel @Inject constructor(
             initialValue = VideoPlayerScreenUiState.Loading
         )
 
-    @OptIn(UnstableApi::class)
-    private fun initializePlayer(context: Context, movieDetails: MovieDetails): ExoPlayer {
-        var player = ExoPlayer.Builder(context)
-            .build()
+    fun toggleSubtitlesVisibility() {
+        Log.d("VideoPlayerScreenViewModel", "Subtitles visibility toggled")
+        _subtitlesVisible.value = !_subtitlesVisible.value
+    }
 
-        player.apply {
-            // Set up ExoPlayer with media item and subtitles
-            val mediaItem = MediaItem.Builder()
-                .setUri(Uri.fromFile(File(movieDetails.videoUri)))
-                .setSubtitleConfigurations(
-                    listOf(
-                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(movieDetails.subtitleUri?.let {
-                            File(
-                                it
-                            )
-                        }))
-                            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
-                            .setLanguage("en")
-                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
-                            .build()
-                    )
-                ).build()
+    fun playVideo(movieDetails: MovieDetails) {
+        // Set up ExoPlayer with media item and subtitles
+        val mediaItem = MediaItem.Builder()
+            .setUri(Uri.fromFile(File(movieDetails.videoUri)))
+            .setSubtitleConfigurations(
+                listOf(
+                    MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(movieDetails.subtitleUri?.let {
+                        File(
+                            it
+                        )
+                    }))
+                        .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+                        .setLanguage("en")
+                        .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                        .build()
+                )
+            ).build()
 
-            player.setMediaItem(mediaItem)
-            player.playWhenReady = true
-            player.prepare()
-        }
+        player.setMediaItem(mediaItem)
+        player.seekTo(3600000 + 1140000+ 600000)
+        player.play()
+    }
 
+    private fun trackPlayerPosition() {
         viewModelScope.launch {
             while (true) {
                 delay(300)
@@ -122,17 +127,12 @@ class VideoPlayerScreenViewModel @Inject constructor(
                 _isPlaying.value = player.isPlaying
             }
         }
-        return player
     }
-
-    fun toggleSubtitlesVisibility() {
-        _subtitlesVisible.value = !_subtitlesVisible.value
-    }
-
 
     override fun onCleared() {
         super.onCleared()
         player.release()
+        Log.d("VideoPlayerScreenViewModel", "Player released")
     }
 }
 

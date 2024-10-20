@@ -16,6 +16,7 @@
 
 package com.google.jetstream.presentation.screens.videoPlayer
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
@@ -31,9 +32,13 @@ import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -46,6 +51,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.res.ResourcesCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -72,6 +80,7 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
+import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
@@ -84,6 +93,7 @@ object VideoPlayerScreen {
  * @param onBackPressed The callback to invoke when the user presses the back button.
  * @param videoPlayerScreenViewModel The view model for the video player screen.
  */
+@OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreen(
     onBackPressed: () -> Unit,
@@ -125,7 +135,23 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
 
     val isControlsVisible = videoPlayerState.controlsVisible
 
-    val exoPlayer = viewModel.player
+    var player = viewModel.player
+
+    var lifecycle by remember {
+        mutableStateOf(Lifecycle.Event.ON_CREATE)
+    }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            lifecycle = event
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     BackHandler(onBack = onBackPressed)
 
@@ -133,14 +159,14 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
     Box(
         Modifier
             .dPadEvents(
-                exoPlayer,
+                player,
                 videoPlayerState,
                 pulseState
             )
             .focusable()
     ) {
         AndroidView(
-            factory = {
+            factory = { context ->
                 PlayerView(context).apply {
                     useController = false
                     subtitleView?.apply {
@@ -150,13 +176,30 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
                         setFractionalTextSize(0.04f)
                         setBottomPaddingFraction(0.15f)  // Move subtitles up by 15% of the screen height
                     }
+                }.also {
+                    it.player = player
                 }
             },
             update = {
-                it.player = exoPlayer
                 it.subtitleView?.updateSubtitleVisibility(subtitlesVisible)
+                when (lifecycle) {
+                    Lifecycle.Event.ON_CREATE -> {
+                        viewModel.playVideo(movieDetails)
+                        Log.d("VideoPlayerScreen", "Lifecycle.Event.ON_CREATE")
+                    }
+
+                    Lifecycle.Event.ON_PAUSE -> {
+                        it.onPause()
+                        it.player?.pause()
+                    }
+
+                    Lifecycle.Event.ON_RESUME -> {
+                        it.onResume()
+                    }
+
+                    else -> Unit
+                }
             },
-            onRelease = { exoPlayer.release() },
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(4 / 3f)
@@ -175,7 +218,7 @@ fun VideoPlayerScreenContent(movieDetails: MovieDetails, onBackPressed: () -> Un
                     movieDetails,
                     isPlaying,
                     currentPosition,
-                    exoPlayer,
+                    player,
                     videoPlayerState,
                     focusRequester,
                     { viewModel.toggleSubtitlesVisibility() }
