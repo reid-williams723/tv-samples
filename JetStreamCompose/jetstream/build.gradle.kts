@@ -111,9 +111,6 @@ dependencies {
     // Compose Previews
     debugImplementation(libs.androidx.compose.ui.tooling)
 
-    // For baseline profile generation
-    baselineProfile(project(":benchmark"))
-
 
     val room_version = "2.6.1"
 
