@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.repositories.MovieRepository
+import com.google.jetstream.data.room.dao.MovieProgressDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 class MovieDetailsScreenViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     repository: MovieRepository,
+    val movieProgressDao: MovieProgressDao
 ) : ViewModel() {
     val uiState = savedStateHandle
         .getStateFlow<String?>(MovieDetailsScreen.MovieIdBundleKey, null)
@@ -39,7 +41,12 @@ class MovieDetailsScreenViewModel @Inject constructor(
                 MovieDetailsScreenUiState.Error
             } else {
                 val details = repository.getMovieDetails(movieId = id)
-                MovieDetailsScreenUiState.Done(movieDetails = details)
+                val progress = movieProgressDao.getMovieProgress(movieId = id)
+
+                MovieDetailsScreenUiState.Done(
+                    movieDetails = details,
+                    progress = progress ?: 0
+                )
             }
         }.stateIn(
             scope = viewModelScope,
@@ -51,5 +58,6 @@ class MovieDetailsScreenViewModel @Inject constructor(
 sealed class MovieDetailsScreenUiState {
     data object Loading : MovieDetailsScreenUiState()
     data object Error : MovieDetailsScreenUiState()
-    data class Done(val movieDetails: MovieDetails) : MovieDetailsScreenUiState()
+    data class Done(val movieDetails: MovieDetails, val progress: Long = 0) :
+        MovieDetailsScreenUiState()
 }

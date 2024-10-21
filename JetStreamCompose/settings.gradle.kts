@@ -30,4 +30,3 @@ dependencyResolutionManagement {
 }
 rootProject.name = "JetStream"
 include(":jetstream")
-include(":benchmark")
