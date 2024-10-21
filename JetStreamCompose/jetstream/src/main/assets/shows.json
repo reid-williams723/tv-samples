@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "title": "Show A",
+    "overview": "This is a description of Show A.",
+    "posterPath": "/poster_path_show_a.jpg",
+    "backdropPath": "/backdrop_path_show_a.jpg",
+    "genres": [
+      "Drama",
+      "Comedy"
+    ],
+    "firstAirDate": "2023-01-01",
+    "lastAirDate": "2023-12-31",
+    "numberOfSeasons": 2,
+    "numberOfEpisodes": 24,
+    "episodes": [
+      {
+        "id": 101,
+        "title": "Episode 1",
+        "seasonNumber": 1,
+        "episodeNumber": 1,
+        "overview": "Episode 1 overview.",
+        "stillPath": "/still_path_episode_1.jpg"
+      },
+      {
+        "id": 102,
+        "title": "Episode 2",
+        "seasonNumber": 1,
+        "episodeNumber": 2,
+        "overview": "Episode 2 overview.",
+        "stillPath": "/still_path_episode_2.jpg"
+      }
+    ]
+  }
+]
