@@ -23,6 +23,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.repositories.MovieRepositoryImpl
+import com.google.jetstream.data.repositories.ShowRepository
+import com.google.jetstream.data.repositories.ShowRepositoryImpl
 import com.google.jetstream.data.room.AppDatabase
 import com.google.jetstream.data.room.dao.MovieProgressDao
 import dagger.Binds
@@ -46,6 +48,16 @@ abstract class MovieRepositoryModule {
     abstract fun bindMovieRepository(
         movieRepositoryImpl: MovieRepositoryImpl
     ): MovieRepository
+}
+
+@InstallIn(SingletonComponent::class)
+@Module
+abstract class ShowRepositoryModule {
+
+    @Binds
+    abstract fun bindShowRepository(
+        showRepositoryImpl: ShowRepositoryImpl
+    ): ShowRepository
 }
 
 @Module

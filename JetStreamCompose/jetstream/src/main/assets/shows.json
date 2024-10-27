@@ -1,10 +1,10 @@
 [
   {
-    "id": 1,
+    "id": "1",
     "title": "Show A",
     "overview": "This is a description of Show A.",
-    "posterPath": "/poster_path_show_a.jpg",
-    "backdropPath": "/backdrop_path_show_a.jpg",
+    "posterPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/16_9-400/cyber-net.jpg",
+    "backdropPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/16_9-400/cyber-net.jpg",
     "genres": [
       "Drama",
       "Comedy"
@@ -15,20 +15,54 @@
     "numberOfEpisodes": 24,
     "episodes": [
       {
-        "id": 101,
+        "id": "101",
         "title": "Episode 1",
         "seasonNumber": 1,
         "episodeNumber": 1,
         "overview": "Episode 1 overview.",
-        "stillPath": "/still_path_episode_1.jpg"
+        "stillPath": "/still_path_episode_1.jpg",
+        "duration": "22min",
+        "releaseDate": "October 21, 2024"
       },
       {
-        "id": 102,
+        "id": "102",
         "title": "Episode 2",
         "seasonNumber": 1,
         "episodeNumber": 2,
         "overview": "Episode 2 overview.",
-        "stillPath": "/still_path_episode_2.jpg"
+        "stillPath": "/still_path_episode_2.jpg",
+        "duration": "22min",
+        "releaseDate": "October 21, 2024"
+      },
+      {
+        "id": "103",
+        "title": "Episode 3",
+        "seasonNumber": 1,
+        "episodeNumber": 2,
+        "overview": "Episode 2 overview.",
+        "stillPath": "/still_path_episode_2.jpg",
+        "duration": "22min",
+        "releaseDate": "October 21, 2024"
+      },
+      {
+        "id": "104",
+        "title": "Episode 4",
+        "seasonNumber": 1,
+        "episodeNumber": 2,
+        "overview": "Episode 2 overview.",
+        "stillPath": "/still_path_episode_2.jpg",
+        "duration": "22min",
+        "releaseDate": "October 21, 2024"
+      },
+      {
+        "id": "105",
+        "title": "Episode 5",
+        "seasonNumber": 1,
+        "episodeNumber": 2,
+        "overview": "Episode 2 overview.",
+        "stillPath": "/still_path_episode_2.jpg",
+        "duration": "22min",
+        "releaseDate": "October 21, 2024"
       }
     ]
   }

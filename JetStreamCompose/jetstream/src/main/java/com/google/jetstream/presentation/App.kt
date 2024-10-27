@@ -26,10 +26,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.jetstream.data.entities.ShowDetails
 import com.google.jetstream.presentation.screens.Screens
 import com.google.jetstream.presentation.screens.categories.CategoryMovieListScreen
 import com.google.jetstream.presentation.screens.dashboard.DashboardScreen
 import com.google.jetstream.presentation.screens.movies.MovieDetailsScreen
+import com.google.jetstream.presentation.screens.shows.ShowDetailsScreen
 import com.google.jetstream.presentation.screens.videoPlayer.VideoPlayerScreen
 
 @Composable
@@ -100,6 +102,18 @@ fun App(
                     }
                 )
             }
+            composable(
+                route = Screens.ShowDetails(),
+                arguments = listOf(
+                    navArgument(ShowDetailsScreen.ShowIdBundleKey) {
+                        type = NavType.StringType
+                    }
+                )
+            ) {
+                ShowDetailsScreen(
+                    goToShowPlayer = {},
+                )
+            }
             composable(route = Screens.Dashboard()) {
                 DashboardScreen(
                     openCategoryMovieList = { categoryId ->
@@ -111,6 +125,9 @@ fun App(
                         navController.navigate(
                             Screens.MovieDetails.withArgs(movieId)
                         )
+                    },
+                    openShowDetailsScreen = {
+                        navController.navigate(Screens.ShowDetails())
                     },
                     openVideoPlayer = {
                         navController.navigate(Screens.VideoPlayer())

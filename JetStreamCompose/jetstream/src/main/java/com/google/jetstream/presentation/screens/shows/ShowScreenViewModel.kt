@@ -19,23 +19,23 @@ package com.google.jetstream.presentation.screens.shows
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.jetstream.data.entities.MovieList
+import com.google.jetstream.data.entities.ShowList
 import com.google.jetstream.data.repositories.MovieRepository
+import com.google.jetstream.data.repositories.ShowRepository
+import com.google.jetstream.presentation.screens.categories.CategoriesScreenUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class ShowScreenViewModel @Inject constructor(
-    movieRepository: MovieRepository
+    showRepository: ShowRepository
 ) : ViewModel() {
-
-    val uiState = combine(
-        movieRepository.getBingeWatchDramas(),
-        movieRepository.getTVShows()
-    ) { (bingeWatchDramaList, tvShowList) ->
-        ShowScreenUiState.Ready(bingeWatchDramaList = bingeWatchDramaList, tvShowList = tvShowList)
+    val uiState = showRepository.getShows().map {
+        ShowScreenUiState.Ready(tvShowList = it)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -46,7 +46,6 @@ class ShowScreenViewModel @Inject constructor(
 sealed interface ShowScreenUiState {
     data object Loading : ShowScreenUiState
     data class Ready(
-        val bingeWatchDramaList: MovieList,
-        val tvShowList: MovieList
+        val tvShowList: ShowList
     ) : ShowScreenUiState
 }

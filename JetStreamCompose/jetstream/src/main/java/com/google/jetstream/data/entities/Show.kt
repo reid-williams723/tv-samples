@@ -3,14 +3,14 @@ package com.google.jetstream.data.entities
 import com.google.jetstream.data.models.ShowsResponseItem
 
 data class Show(
-    val id: Int,
+    val id: String,
     val title: String,
-    val overview: String?,
-    val posterPath: String?,
-    val backdropPath: String?,
+    val overview: String,
+    val posterPath: String,
+    val backdropPath: String,
     val genres: List<String>,
-    val firstAirDate: String?,
-    val lastAirDate: String?,
+    val firstAirDate: String,
+    val lastAirDate: String,
     val numberOfSeasons: Int,
     val numberOfEpisodes: Int,
     val episodes: List<Episode> // Include the list of episodes

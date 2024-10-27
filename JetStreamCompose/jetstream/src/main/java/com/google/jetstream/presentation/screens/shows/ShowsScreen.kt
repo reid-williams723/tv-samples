@@ -32,15 +32,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.jetstream.data.entities.Movie
 import com.google.jetstream.data.entities.MovieList
+import com.google.jetstream.data.entities.Show
+import com.google.jetstream.data.entities.ShowList
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Loading
 import com.google.jetstream.presentation.common.MoviesRow
+import com.google.jetstream.presentation.common.ShowsRow
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
 import com.google.jetstream.presentation.screens.movies.MoviesScreenMovieList
 
 @Composable
 fun ShowsScreen(
-    onTVShowClick: (movie: Movie) -> Unit,
+    onShowClick: (show: Show) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     showScreenViewModel: ShowScreenViewModel = hiltViewModel(),
@@ -53,9 +56,8 @@ fun ShowsScreen(
 
         is ShowScreenUiState.Ready -> {
             Catalog(
-                tvShowList = currentState.tvShowList,
-                bingeWatchDramaList = currentState.bingeWatchDramaList,
-                onTVShowClick = onTVShowClick,
+                showList = currentState.tvShowList,
+                onShowClick = onShowClick,
                 onScroll = onScroll,
                 isTopBarVisible = isTopBarVisible,
                 modifier = Modifier.fillMaxSize()
@@ -66,9 +68,8 @@ fun ShowsScreen(
 
 @Composable
 private fun Catalog(
-    tvShowList: MovieList,
-    bingeWatchDramaList: MovieList,
-    onTVShowClick: (movie: Movie) -> Unit,
+    showList: ShowList,
+    onShowClick: (show: Show) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     isTopBarVisible: Boolean,
     modifier: Modifier = Modifier
@@ -95,17 +96,11 @@ private fun Catalog(
         contentPadding = PaddingValues(top = childPadding.top, bottom = 104.dp)
     ) {
         item {
-            MoviesScreenMovieList(
-                movieList = tvShowList,
-                onMovieClick = onTVShowClick
-            )
-        }
-        item {
-            MoviesRow(
+            ShowsRow(
                 modifier = Modifier.padding(top = childPadding.top),
                 title = StringConstants.Composable.BingeWatchDramasTitle,
-                movieList = bingeWatchDramaList,
-                onMovieSelected = onTVShowClick
+                showList = showList,
+                onShowSelected = onShowClick
             )
         }
     }

@@ -17,6 +17,7 @@
 package com.google.jetstream.data.repositories
 
 import com.google.jetstream.data.entities.Movie
+import com.google.jetstream.data.entities.Show
 import com.google.jetstream.data.models.MovieCastResponseItem
 import com.google.jetstream.data.models.MovieCategoriesResponseItem
 import com.google.jetstream.data.models.MoviesResponseItem
@@ -44,7 +45,6 @@ internal class CachedDataReader<T>(private val reader: suspend () -> List<T>) {
 }
 
 internal typealias MovieDataReader = CachedDataReader<Movie>
-internal typealias ShowDataReader = CachedDataReader<Show>
 
 internal suspend fun readMovieData(
     assetsReader: AssetsReader,
