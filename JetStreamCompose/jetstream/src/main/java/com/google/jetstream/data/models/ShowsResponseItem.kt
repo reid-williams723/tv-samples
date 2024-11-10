@@ -1,5 +1,6 @@
 package com.google.jetstream.data.models
 
+import com.google.jetstream.data.entities.Season
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,5 +15,5 @@ data class ShowsResponseItem(
     val lastAirDate: String,
     val numberOfSeasons: Int,
     val numberOfEpisodes: Int,
-    val episodes: List<EpisodeResponseItem> // Include the list of episodes
+    val seasons: List<SeasonResponseItem>
 )

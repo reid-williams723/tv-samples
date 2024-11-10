@@ -13,56 +13,70 @@
     "lastAirDate": "2023-12-31",
     "numberOfSeasons": 2,
     "numberOfEpisodes": 24,
-    "episodes": [
+    "seasons": [
       {
-        "id": "101",
-        "title": "Episode 1",
+        "id": "1",
         "seasonNumber": 1,
-        "episodeNumber": 1,
-        "overview": "Episode 1 overview.",
-        "stillPath": "/still_path_episode_1.jpg",
-        "duration": "22min",
-        "releaseDate": "October 21, 2024"
+        "releaseDate": "2023-01-01",
+        "episodes": [
+          {
+            "id": "101",
+            "title": "Episode 1",
+            "seasonNumber": 1,
+            "episodeNumber": 1,
+            "overview": "Episode 1 overview.",
+            "stillPath": "/still_path_episode_1.jpg",
+            "duration": "22min",
+            "releaseDate": "October 21, 2024"
+          },
+          {
+            "id": "102",
+            "title": "Episode 2",
+            "seasonNumber": 1,
+            "episodeNumber": 2,
+            "overview": "Episode 2 overview.",
+            "stillPath": "/still_path_episode_2.jpg",
+            "duration": "22min",
+            "releaseDate": "October 21, 2024"
+          }
+        ]
       },
       {
-        "id": "102",
-        "title": "Episode 2",
-        "seasonNumber": 1,
-        "episodeNumber": 2,
-        "overview": "Episode 2 overview.",
-        "stillPath": "/still_path_episode_2.jpg",
-        "duration": "22min",
-        "releaseDate": "October 21, 2024"
-      },
-      {
-        "id": "103",
-        "title": "Episode 3",
-        "seasonNumber": 1,
-        "episodeNumber": 2,
-        "overview": "Episode 2 overview.",
-        "stillPath": "/still_path_episode_2.jpg",
-        "duration": "22min",
-        "releaseDate": "October 21, 2024"
-      },
-      {
-        "id": "104",
-        "title": "Episode 4",
-        "seasonNumber": 1,
-        "episodeNumber": 2,
-        "overview": "Episode 2 overview.",
-        "stillPath": "/still_path_episode_2.jpg",
-        "duration": "22min",
-        "releaseDate": "October 21, 2024"
-      },
-      {
-        "id": "105",
-        "title": "Episode 5",
-        "seasonNumber": 1,
-        "episodeNumber": 2,
-        "overview": "Episode 2 overview.",
-        "stillPath": "/still_path_episode_2.jpg",
-        "duration": "22min",
-        "releaseDate": "October 21, 2024"
+        "id": "2",
+        "seasonNumber": 2,
+        "releaseDate": "2023-01-02",
+        "episodes": [
+          {
+            "id": "103",
+            "title": "Episode 3",
+            "seasonNumber": 1,
+            "episodeNumber": 2,
+            "overview": "Episode 2 overview.",
+            "stillPath": "/still_path_episode_2.jpg",
+            "duration": "22min",
+            "releaseDate": "October 21, 2024"
+          },
+          {
+            "id": "104",
+            "title": "Episode 4",
+            "seasonNumber": 1,
+            "episodeNumber": 2,
+            "overview": "Episode 2 overview.",
+            "stillPath": "/still_path_episode_2.jpg",
+            "duration": "22min",
+            "releaseDate": "October 21, 2024"
+          },
+          {
+            "id": "105",
+            "title": "Episode 5",
+            "seasonNumber": 1,
+            "episodeNumber": 2,
+            "overview": "Episode 2 overview.",
+            "stillPath": "/still_path_episode_2.jpg",
+            "duration": "22min",
+            "releaseDate": "October 21, 2024"
+          }
+        ]
       }
     ]
   }

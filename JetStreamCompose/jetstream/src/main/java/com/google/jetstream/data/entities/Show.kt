@@ -13,11 +13,11 @@ data class Show(
     val lastAirDate: String,
     val numberOfSeasons: Int,
     val numberOfEpisodes: Int,
-    val episodes: List<Episode> // Include the list of episodes
+    val seasons: List<Season>
 )
 
 fun ShowsResponseItem.toShow(): Show {
-    val episodes = episodes.map { it.toEpisode() }
+    val seasons = seasons.map { it.toSeason() }
     return Show(
         id,
         title,
@@ -29,6 +29,6 @@ fun ShowsResponseItem.toShow(): Show {
         lastAirDate,
         numberOfSeasons,
         numberOfEpisodes,
-        episodes
+        seasons
     )
 }
