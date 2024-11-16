@@ -27,7 +27,9 @@
             "overview": "Episode 1 overview.",
             "stillPath": "/still_path_episode_1.jpg",
             "duration": "22min",
-            "releaseDate": "October 21, 2024"
+            "releaseDate": "October 21, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
             "id": "102",
@@ -37,7 +39,9 @@
             "overview": "Episode 2 overview.",
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
-            "releaseDate": "October 21, 2024"
+            "releaseDate": "October 21, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           }
         ]
       },
@@ -54,7 +58,9 @@
             "overview": "Episode 2 overview.",
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
-            "releaseDate": "October 21, 2024"
+            "releaseDate": "October 21, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
             "id": "104",
@@ -64,7 +70,9 @@
             "overview": "Episode 2 overview.",
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
-            "releaseDate": "October 21, 2024"
+            "releaseDate": "October 21, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
             "id": "105",
@@ -74,7 +82,9 @@
             "overview": "Episode 2 overview.",
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
-            "releaseDate": "October 21, 2024"
+            "releaseDate": "October 21, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           }
         ]
       }

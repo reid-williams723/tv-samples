@@ -29,6 +29,7 @@ import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.google.jetstream.data.entities.MovieDetails
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.room.dao.MovieProgressDao
 import com.google.jetstream.data.room.entities.MovieProgress

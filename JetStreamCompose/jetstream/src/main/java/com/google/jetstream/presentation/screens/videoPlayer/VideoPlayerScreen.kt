@@ -63,6 +63,7 @@ import androidx.media3.ui.SubtitleView
 import androidx.tv.material3.Text
 import com.google.jetstream.R
 import com.google.jetstream.data.entities.MovieDetails
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Error
 import com.google.jetstream.presentation.common.Loading
@@ -99,6 +100,7 @@ object VideoPlayerScreen {
 fun VideoPlayerScreen(
     movieId: String,
     startFromBeginning: Boolean,
+    mediaType: MediaType = MediaType.Movie,
     onBackPressed: () -> Unit,
     videoPlayerScreenViewModel: VideoPlayerScreenViewModel = hiltViewModel()
 ) {

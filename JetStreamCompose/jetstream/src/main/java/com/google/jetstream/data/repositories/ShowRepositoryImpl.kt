@@ -12,4 +12,11 @@ class ShowRepositoryImpl @Inject constructor(
         val list = showDataSource.getShowsList()
         emit(list)
     }
+
+    override fun getEpisodesForSeason(showId: String, seasonNumber: Int) = flow {
+        val shows = showDataSource.getShowsList()
+        val show = shows.find { it.id == showId }
+        val season = show?.seasons?.find { it.seasonNumber == seasonNumber }
+        season?.episodes?.let { emit(it) }
+    }
 }
