@@ -17,14 +17,17 @@
 package com.google.jetstream.presentation.screens.videoPlayer.components
 
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.unit.dp
 import com.google.jetstream.data.util.StringConstants
 import kotlin.time.Duration
 
@@ -36,7 +39,9 @@ fun VideoPlayerSeeker(
     onPlayPauseToggle: (Boolean) -> Unit,
     onSeek: (Float) -> Unit,
     contentProgress: Duration,
-    contentDuration: Duration
+    contentDuration: Duration,
+    skipPrevious: () -> Unit = {},
+    skipNext: () -> Unit = {}
 ) {
     val contentProgressString =
         contentProgress.toComponents { h, m, s, _ ->
@@ -59,6 +64,18 @@ fun VideoPlayerSeeker(
         verticalAlignment = Alignment.CenterVertically
     ) {
         VideoPlayerControlsIcon(
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .padding(8.dp),
+            icon = Icons.Default.SkipPrevious,
+            onClick = skipPrevious,
+            state = state,
+            isPlaying = isPlaying,
+            contentDescription = StringConstants
+                .Composable
+                .VideoPlayerControlForward
+        )
+        VideoPlayerControlsIcon(
             modifier = Modifier.focusRequester(focusRequester),
             icon = if (!isPlaying) Icons.Default.PlayArrow else Icons.Default.Pause,
             onClick = { onPlayPauseToggle(!isPlaying) },
@@ -67,6 +84,18 @@ fun VideoPlayerSeeker(
             contentDescription = StringConstants
                 .Composable
                 .VideoPlayerControlPlayPauseButton
+        )
+        VideoPlayerControlsIcon(
+            modifier = Modifier
+                .focusRequester(focusRequester)
+                .padding(8.dp),
+            icon = Icons.Default.SkipNext,
+            onClick = skipNext,
+            state = state,
+            isPlaying = isPlaying,
+            contentDescription = StringConstants
+                .Composable
+                .VideoPlayerControlForward
         )
         VideoPlayerControllerText(text = contentProgressString)
         VideoPlayerControllerIndicator(
