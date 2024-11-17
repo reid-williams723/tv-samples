@@ -55,6 +55,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.CaptionStyleCompat
@@ -131,7 +132,8 @@ fun VideoPlayerScreen(
 fun VideoPlayerScreenContent(
     movieDetails: MovieDetails,
     startFromBeginning: Boolean = false,
-    onBackPressed: () -> Unit) {
+    onBackPressed: () -> Unit
+) {
 
     val viewModel = hiltViewModel<VideoPlayerScreenViewModel>()
     val context = LocalContext.current
@@ -261,6 +263,7 @@ fun SubtitleOverlay(subtitleText: String, modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerControls(
     movieDetails: MovieDetails,
@@ -332,7 +335,9 @@ fun VideoPlayerControls(
                 onPlayPauseToggle,
                 onSeek = { exoPlayer.seekTo(exoPlayer.duration.times(it).toLong()) },
                 contentProgress = contentCurrentPosition.milliseconds,
-                contentDuration = exoPlayer.duration.milliseconds
+                contentDuration = exoPlayer.duration.milliseconds,
+                skipPrevious = { exoPlayer.seekToPreviousMediaItem() },
+                skipNext = { exoPlayer.seekToPreviousMediaItem() }
             )
         },
         more = null

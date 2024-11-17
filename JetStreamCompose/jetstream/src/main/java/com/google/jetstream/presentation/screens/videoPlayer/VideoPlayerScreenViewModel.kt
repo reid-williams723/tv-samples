@@ -52,7 +52,8 @@ class VideoPlayerScreenViewModel @Inject constructor(
     private val repository: MovieRepository,
     @ApplicationContext context: Context,
     val player: ExoPlayer,
-    val movieProgressDao: MovieProgressDao
+    val movieProgressDao: MovieProgressDao,
+
 ) : ViewModel() {
 
     init {
@@ -122,8 +123,43 @@ class VideoPlayerScreenViewModel @Inject constructor(
             if (movieProgress != null && !startFromBeginning) {
                 player.seekTo(movieProgress)
             }
+
+            addMediaItems()
+
             player.play()
         }
+    }
+
+    fun addMediaItems() {
+        val mediaItem = MediaItem.Builder()
+            .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv")))
+            .build()
+
+        val mediaItem2 = MediaItem.Builder()
+            .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv")))
+            .build()
+
+        player.addMediaItem(mediaItem)
+        player.addMediaItem(mediaItem2)
+
+//        player.addListener(object : Player.Listener {
+//            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+//                Log.d("VideoPlayerScreenViewModel", "Media item transition: $mediaItem")
+//                viewModelScope.launch {
+//                    try {
+//                        val mediaId = mediaItem?.mediaId
+//                        if (mediaId != null) {
+//                            val movieProgress = movieProgressDao.getMovieProgress(mediaId)
+//                            if (movieProgress != null) {
+//                                player.seekTo(movieProgress)
+//                            }
+//                        }
+//                    } catch (e: Exception) {
+//                        // Handle network errors
+//                    }
+//                }
+//            }
+//        })
     }
 
     private fun trackPlayerPosition() {
