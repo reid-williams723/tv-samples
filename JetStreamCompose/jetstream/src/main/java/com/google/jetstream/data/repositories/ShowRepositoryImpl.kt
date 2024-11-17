@@ -30,10 +30,10 @@ class ShowRepositoryImpl @Inject constructor(
         season?.episodes?.let { emit(it) }
     }
 
-    override fun getAllEpisodesForShow(showId: String) = flow {
+    override suspend fun getAllEpisodesForShow(showId: String): EpisodeList {
         val shows = showDataSource.getShowsList()
         val show = shows.find { it.id == showId }
-        show?.seasons?.flatMap { it.episodes }?.let { emit(it) }
+        return show?.seasons?.flatMap { it.episodes } ?: emptyList()
     }
 
     override suspend fun getEpisodeDetailsByShowIdAndEpisodeId(

@@ -279,6 +279,8 @@ fun VideoPlayerControls(
     focusRequester: FocusRequester,
     toggleSubtitles: () -> Unit
 ) {
+    val viewModel = hiltViewModel<VideoPlayerScreenViewModel>()
+
     val onPlayPauseToggle = { shouldPlay: Boolean ->
         if (shouldPlay) {
             exoPlayer.play()
@@ -341,8 +343,11 @@ fun VideoPlayerControls(
                 onSeek = { exoPlayer.seekTo(exoPlayer.duration.times(it).toLong()) },
                 contentProgress = contentCurrentPosition.milliseconds,
                 contentDuration = exoPlayer.duration.milliseconds,
-                skipPrevious = { exoPlayer.seekToPreviousMediaItem() },
-                skipNext = { exoPlayer.seekToPreviousMediaItem() }
+//                skipPrevious = { exoPlayer.seekToPreviousMediaItem() },
+//                skipNext = { exoPlayer.seekToNextMediaItem() }
+                skipPrevious = { viewModel.skipToPreviousMediaItem(mediaDetails) },
+                skipNext = { viewModel.skipToNextMediaItem(mediaDetails) }
+
             )
         },
         more = null

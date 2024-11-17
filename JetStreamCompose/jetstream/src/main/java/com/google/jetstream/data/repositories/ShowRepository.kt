@@ -11,7 +11,7 @@ interface ShowRepository {
     fun getShows(): Flow<ShowList>
     suspend fun getShowById(showId: String): Show
     fun getEpisodesForSeason(showId: String, seasonNumber: Int): Flow<EpisodeList>
-    fun getAllEpisodesForShow(showId: String): Flow<EpisodeList>
+    suspend fun getAllEpisodesForShow(showId: String): EpisodeList
     suspend fun getEpisodeDetailsByShowIdAndEpisodeId(showId: String, episodeId: String): Episode
     suspend fun getShowFirstEpisode(showId: String): Episode
 }

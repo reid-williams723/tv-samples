@@ -19,7 +19,9 @@ package com.google.jetstream.presentation.screens.videoPlayer
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.semantics.getOrNull
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,6 +30,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.google.jetstream.data.entities.Episode
+import com.google.jetstream.data.entities.EpisodeList
 import com.google.jetstream.data.entities.MediaDetails
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.enum.MediaType
@@ -43,11 +47,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
+import kotlin.collections.indexOfFirst
 
 @UnstableApi
 @HiltViewModel
@@ -62,9 +68,72 @@ class VideoPlayerScreenViewModel @Inject constructor(
 
 ) : ViewModel() {
 
+    private val _uiState =
+        MutableStateFlow<VideoPlayerScreenUiState>(VideoPlayerScreenUiState.Loading)
+    val uiState: StateFlow<VideoPlayerScreenUiState> = _uiState.asStateFlow()
+
     init {
         player.prepare()
         trackPlayerPosition()
+
+        viewModelScope.launch {
+            combine(
+                savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null),
+                savedStateHandle.getStateFlow<Boolean?>(
+                    VideoPlayerScreen.StartFromBeginningKey,
+                    null
+                ),
+                savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.MediaTypeBundleKey, null),
+                savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.ShowIdBundleKey, null)
+            ) { id, startFromBeginning, mediaType, showId ->
+                if (id == null || startFromBeginning == null) {
+                    VideoPlayerScreenUiState.Error
+                } else {
+                    if (mediaType == MediaType.Show.name) {
+                        val episodeDetails =
+                            showId?.let {
+                                showRepository.getEpisodeDetailsByShowIdAndEpisodeId(
+                                    it,
+                                    id
+                                )
+                            }
+                        episodeDetails?.let {
+                            MediaDetails(
+                                it.id,
+                                episodeDetails.title,
+                                episodeDetails.releaseDate,
+                                episodeDetails.videoUri,
+                                episodeDetails.subtitleUri,
+                                showId
+                            )
+                        }?.let {
+                            VideoPlayerScreenUiState.Done(
+                                mediaDetails = it,
+                                startFromBeginning = startFromBeginning
+                            )
+                        }
+                    } else {
+                        val details = movieRepository.getMovieDetails(movieId = id)
+                        val mediaDetails = MediaDetails(
+                            details.id,
+                            details.name,
+                            details.releaseDate,
+                            details.videoUri,
+                            details.subtitleUri,
+                            showId = null
+                        )
+                        VideoPlayerScreenUiState.Done(
+                            mediaDetails = mediaDetails,
+                            startFromBeginning = startFromBeginning
+                        )
+                    }
+                }
+            }.collect { newState ->
+                if (newState != null) {
+                    _uiState.value = newState
+                }
+            }
+        }
     }
 
     private val _isPlaying = MutableStateFlow(false)
@@ -76,57 +145,57 @@ class VideoPlayerScreenViewModel @Inject constructor(
     private val _subtitlesVisible = MutableStateFlow(true)
     val subtitlesVisible: StateFlow<Boolean> = _subtitlesVisible
 
-    val uiState = combine(
-        savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null),
-        savedStateHandle.getStateFlow<Boolean?>(VideoPlayerScreen.StartFromBeginningKey, null),
-        savedStateHandle.getStateFlow<String?>(
-            VideoPlayerScreen.MediaTypeBundleKey,
-            null
-        ),
-        savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.ShowIdBundleKey, null)
-    ) { id, startFromBeginning, mediaType, showId ->
-        if (id == null || startFromBeginning == null) {
-            VideoPlayerScreenUiState.Error
-        } else {
-            if (mediaType == MediaType.Show.name) {
-                val episodeDetails =
-                    showId?.let { showRepository.getEpisodeDetailsByShowIdAndEpisodeId(it, id) }
-                episodeDetails?.let {
-                    MediaDetails(
-                        it.id,
-                        episodeDetails.title,
-                        episodeDetails.releaseDate,
-                        episodeDetails.videoUri,
-                        episodeDetails.subtitleUri,
-                        showId
-                    )
-                }?.let {
-                    VideoPlayerScreenUiState.Done(
-                        mediaDetails = it,
-                        startFromBeginning = startFromBeginning
-                    )
-                }
-            } else {
-                val details = movieRepository.getMovieDetails(movieId = id)
-                val mediaDetails = MediaDetails(
-                    details.id,
-                    details.name,
-                    details.releaseDate,
-                    details.videoUri,
-                    details.subtitleUri,
-                    showId = null
-                )
-                VideoPlayerScreenUiState.Done(
-                    mediaDetails = mediaDetails,
-                    startFromBeginning = startFromBeginning
-                )
-            }
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = VideoPlayerScreenUiState.Loading
-    )
+//    private val _uiState = combine(
+//        savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.MovieIdBundleKey, null),
+//        savedStateHandle.getStateFlow<Boolean?>(VideoPlayerScreen.StartFromBeginningKey, null),
+//        savedStateHandle.getStateFlow<String?>(
+//            VideoPlayerScreen.MediaTypeBundleKey,
+//            null
+//        ),
+//        savedStateHandle.getStateFlow<String?>(VideoPlayerScreen.ShowIdBundleKey, null)
+//    ) { id, startFromBeginning, mediaType, showId ->
+//        if (id == null || startFromBeginning == null) {
+//            VideoPlayerScreenUiState.Error
+//        } else {
+//            if (mediaType == MediaType.Show.name) {
+//                val episodeDetails =
+//                    showId?.let { showRepository.getEpisodeDetailsByShowIdAndEpisodeId(it, id) }
+//                episodeDetails?.let {
+//                    MediaDetails(
+//                        it.id,
+//                        episodeDetails.title,
+//                        episodeDetails.releaseDate,
+//                        episodeDetails.videoUri,
+//                        episodeDetails.subtitleUri,
+//                        showId
+//                    )
+//                }?.let {
+//                    VideoPlayerScreenUiState.Done(
+//                        mediaDetails = it,
+//                        startFromBeginning = startFromBeginning
+//                    )
+//                }
+//            } else {
+//                val details = movieRepository.getMovieDetails(movieId = id)
+//                val mediaDetails = MediaDetails(
+//                    details.id,
+//                    details.name,
+//                    details.releaseDate,
+//                    details.videoUri,
+//                    details.subtitleUri,
+//                    showId = null
+//                )
+//                VideoPlayerScreenUiState.Done(
+//                    mediaDetails = mediaDetails,
+//                    startFromBeginning = startFromBeginning
+//                )
+//            }
+//        }
+//    }.stateIn(
+//        scope = viewModelScope,
+//        started = SharingStarted.WhileSubscribed(5_000),
+//        initialValue = VideoPlayerScreenUiState.Loading
+//    )
 
     fun toggleSubtitlesVisibility() {
         Log.d("VideoPlayerScreenViewModel", "Subtitles visibility toggled")
@@ -153,10 +222,25 @@ class VideoPlayerScreenViewModel @Inject constructor(
                 ).build()
 
             if (mediaType == MediaType.Show) {
+                val episodes: EpisodeList? =
+                    mediaDetails.showId?.let { showRepository.getAllEpisodesForShow(showId = it) }
+
+
                 val showProgress = mediaDetails.showId?.let { showProgressDao.getShowProgress(it) }
-                player.setMediaItem(mediaItem)
-                if (showProgress != null && !startFromBeginning) {
-                    player.seekTo(showProgress.playbackPosition)
+                val mediaItems = episodes?.toMediaItems()
+                player.setMediaItems(mediaItems ?: emptyList())
+
+                val index = episodes?.indexOfFirst { it.id == mediaDetails.id }
+                if (index != -1) {
+                    if (showProgress != null && !startFromBeginning) {
+                        if (index != null) {
+                            player.seekTo(index, showProgress.playbackPosition)
+                        }
+                    } else {
+                        if (index != null) {
+                            player.seekTo(index, 0)
+                        }
+                    }
                 }
             } else {
                 val movieProgress = movieProgressDao.getMovieProgress(mediaDetails.id)
@@ -165,42 +249,61 @@ class VideoPlayerScreenViewModel @Inject constructor(
                     player.seekTo(movieProgress)
                 }
             }
-            addMediaItems()
-
             player.play()
         }
     }
 
-    fun addMediaItems() {
-        val mediaItem = MediaItem.Builder()
-            .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv")))
-            .build()
+    fun skipToMediaItem(mediaDetails: MediaDetails) {
+        viewModelScope.launch {
+            val currentMediaItemIndex = player.currentMediaItemIndex
 
-        val mediaItem2 = MediaItem.Builder()
-            .setUri(Uri.fromFile(File("/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv")))
-            .build()
+            val episodeList: EpisodeList? =
+                mediaDetails.showId?.let { showRepository.getAllEpisodesForShow(showId = it) }
+            val currentEpisode = episodeList?.get(currentMediaItemIndex)
 
-        player.addMediaItem(mediaItem)
-        player.addMediaItem(mediaItem2)
+            if (currentEpisode != null) {
+                val newMediaDetails = MediaDetails(
+                    currentEpisode.id,
+                    currentEpisode.title,
+                    currentEpisode.releaseDate,
+                    currentEpisode.videoUri,
+                    currentEpisode.subtitleUri,
+                    mediaDetails.showId
+                )
+                _uiState.value = VideoPlayerScreenUiState.Done(newMediaDetails, false)
+            }
+        }
+    }
 
-//        player.addListener(object : Player.Listener {
-//            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-//                Log.d("VideoPlayerScreenViewModel", "Media item transition: $mediaItem")
-//                viewModelScope.launch {
-//                    try {
-//                        val mediaId = mediaItem?.mediaId
-//                        if (mediaId != null) {
-//                            val movieProgress = movieProgressDao.getMovieProgress(mediaId)
-//                            if (movieProgress != null) {
-//                                player.seekTo(movieProgress)
-//                            }
-//                        }
-//                    } catch (e: Exception) {
-//                        // Handle network errors
-//                    }
-//                }
-//            }
-//        })
+    fun skipToNextMediaItem(mediaDetails: MediaDetails) {
+        player.seekToNextMediaItem()
+        skipToMediaItem(mediaDetails)
+    }
+
+    fun skipToPreviousMediaItem(mediaDetails: MediaDetails) {
+        player.seekToPreviousMediaItem()
+        skipToMediaItem(mediaDetails)
+    }
+
+    fun List<Episode>.toMediaItems(): List<MediaItem> {
+        return this.map { episode ->
+            MediaItem.Builder()
+                .setUri(Uri.fromFile(File(episode.videoUri)))
+                .setSubtitleConfigurations(
+                    listOf(
+                        MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(episode.subtitleUri.let {
+                            File(
+                                it
+                            )
+                        }))
+                            .setMimeType(MimeTypes.APPLICATION_SUBRIP)
+                            .setLanguage("en")
+                            .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
+                            .build()
+                    )
+                )
+                .build()
+        }
     }
 
     private fun trackPlayerPosition() {
