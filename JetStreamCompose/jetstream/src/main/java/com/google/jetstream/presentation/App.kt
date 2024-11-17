@@ -26,7 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.jetstream.data.entities.ShowDetails
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.presentation.screens.Screens
 import com.google.jetstream.presentation.screens.categories.CategoryMovieListScreen
 import com.google.jetstream.presentation.screens.dashboard.DashboardScreen
@@ -76,14 +76,26 @@ fun App(
                 )
             ) {
                 MovieDetailsScreen(
-                    goToMoviePlayerBegin = { movieId, startFromBeginning ->
+                    goToMoviePlayerBegin = { movieId, startFromBeginning, mediaType, showId ->
+                        val showIdAny: Any = showId ?: ""
                         navController.navigate(
-                            Screens.VideoPlayer.withArgs(movieId, startFromBeginning)
+                            Screens.VideoPlayer.withArgs(
+                                movieId,
+                                startFromBeginning,
+                                mediaType,
+                                showIdAny
+                            )
                         )
                     },
-                    goToMoviePlayerResume = { movieId, startFromBeginning ->
+                    goToMoviePlayerResume = { movieId, startFromBeginning, mediaType, showId ->
+                        val showIdAny: Any = showId ?: ""
                         navController.navigate(
-                            Screens.VideoPlayer.withArgs(movieId, startFromBeginning)
+                            Screens.VideoPlayer.withArgs(
+                                movieId,
+                                startFromBeginning,
+                                mediaType,
+                                showIdAny
+                            )
                         )
                     },
                     refreshScreenWithNewMovie = { movie ->
@@ -111,7 +123,36 @@ fun App(
                 )
             ) {
                 ShowDetailsScreen(
-                    goToShowPlayer = {},
+                    goToEpisodePlayer = { episodeId, startFromBeginning, mediaType, showId ->
+                        navController.navigate(
+                            Screens.VideoPlayer.withArgs(
+                                episodeId,
+                                startFromBeginning,
+                                mediaType,
+                                showId
+                            )
+                        )
+                    },
+                    goToShowPlayerBegin = { episodeId, startFromBeginning, mediaType, showId ->
+                        navController.navigate(
+                            Screens.VideoPlayer.withArgs(
+                                episodeId,
+                                startFromBeginning,
+                                mediaType,
+                                showId
+                            )
+                        )
+                    },
+                    goToShowPlayerResume = { episodeId, startFromBeginning, mediaType, showId ->
+                        navController.navigate(
+                            Screens.VideoPlayer.withArgs(
+                                episodeId,
+                                startFromBeginning,
+                                mediaType,
+                                showId
+                            )
+                        )
+                    },
                 )
             }
             composable(route = Screens.Dashboard()) {
@@ -126,8 +167,10 @@ fun App(
                             Screens.MovieDetails.withArgs(movieId)
                         )
                     },
-                    openShowDetailsScreen = {
-                        navController.navigate(Screens.ShowDetails())
+                    openShowDetailsScreen = { showId ->
+                        navController.navigate(
+                            Screens.ShowDetails.withArgs(showId)
+                        )
                     },
                     openVideoPlayer = {
                         navController.navigate(Screens.VideoPlayer())
@@ -146,16 +189,33 @@ fun App(
                     },
                     navArgument(VideoPlayerScreen.StartFromBeginningKey) {
                         type = NavType.BoolType
+                    },
+                    navArgument(VideoPlayerScreen.MediaTypeBundleKey) {
+                        type = NavType.StringType
+                    },
+                    navArgument(VideoPlayerScreen.ShowIdBundleKey) {
+                        type = NavType.StringType
                     }
                 )
             ) {
                 val movieId = it.arguments?.getString(VideoPlayerScreen.MovieIdBundleKey)
                 val startFromBeginning =
                     it.arguments?.getBoolean(VideoPlayerScreen.StartFromBeginningKey)
+                var mediaType = it.arguments?.getString(VideoPlayerScreen.MediaTypeBundleKey)
+                val showId = it.arguments?.getString(VideoPlayerScreen.ShowIdBundleKey)
+
+                // Default to movie if no media type is provided
+                if (mediaType == null) {
+                    mediaType = MediaType.Movie.name
+                }
+
                 if (movieId == null || startFromBeginning == null) {
                     return@composable
                 }
+
                 VideoPlayerScreen(
+                    showId = showId,
+                    mediaType = MediaType.valueOf(mediaType),
                     movieId = movieId,
                     startFromBeginning = startFromBeginning,
                     onBackPressed = {

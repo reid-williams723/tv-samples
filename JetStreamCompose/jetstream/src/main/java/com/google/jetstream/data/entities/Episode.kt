@@ -10,9 +10,22 @@ data class Episode(
     val overview: String,
     val stillPath: String,
     val releaseDate: String,
-    val duration: String
+    val duration: String,
+    val videoUri: String,
+    val subtitleUri: String
 )
 
 fun EpisodeResponseItem.toEpisode(): Episode {
-    return Episode(id, title, seasonNumber, episodeNumber, overview, stillPath, releaseDate, duration)
+    return Episode(
+        id,
+        title,
+        seasonNumber,
+        episodeNumber,
+        overview,
+        stillPath,
+        releaseDate,
+        duration,
+        videoUri,
+        subtitleUri
+    )
 }

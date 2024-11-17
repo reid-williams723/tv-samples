@@ -22,6 +22,8 @@ import com.google.jetstream.data.entities.MovieList
 import com.google.jetstream.data.entities.ShowList
 import com.google.jetstream.data.repositories.MovieRepository
 import com.google.jetstream.data.repositories.ShowRepository
+import com.google.jetstream.data.room.dao.MovieProgressDao
+import com.google.jetstream.data.room.dao.ShowProgressDao
 import com.google.jetstream.presentation.screens.categories.CategoriesScreenUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -29,11 +31,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ShowScreenViewModel @Inject constructor(
     showRepository: ShowRepository
 ) : ViewModel() {
+
     val uiState = showRepository.getShows().map {
         ShowScreenUiState.Ready(tvShowList = it)
     }.stateIn(

@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.ClosedCaption
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +54,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.CaptionStyleCompat
@@ -63,6 +61,7 @@ import androidx.media3.ui.PlayerView
 import androidx.media3.ui.SubtitleView
 import androidx.tv.material3.Text
 import com.google.jetstream.R
+import com.google.jetstream.data.entities.MediaDetails
 import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.data.util.StringConstants
@@ -82,12 +81,13 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
-import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 object VideoPlayerScreen {
     const val MovieIdBundleKey = "movieId"
     const val StartFromBeginningKey = "startFromBeginning"
+    const val MediaTypeBundleKey = "mediaType"
+    const val ShowIdBundleKey = "showId"
 }
 
 /**
@@ -99,6 +99,7 @@ object VideoPlayerScreen {
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreen(
+    showId: String? = null,
     movieId: String,
     startFromBeginning: Boolean,
     mediaType: MediaType = MediaType.Movie,
@@ -119,18 +120,22 @@ fun VideoPlayerScreen(
 
         is VideoPlayerScreenUiState.Done -> {
             VideoPlayerScreenContent(
-                movieDetails = s.movieDetails,
+                mediaType = mediaType,
+                mediaDetails = s.mediaDetails,
                 startFromBeginning = s.startFromBeginning,
                 onBackPressed = onBackPressed
             )
         }
+
+        null -> TODO()
     }
 }
 
 @androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreenContent(
-    movieDetails: MovieDetails,
+    mediaType: MediaType,
+    mediaDetails: MediaDetails,
     startFromBeginning: Boolean = false,
     onBackPressed: () -> Unit
 ) {
@@ -165,7 +170,7 @@ fun VideoPlayerScreenContent(
     }
 
     BackHandler(onBack = {
-        viewModel.saveCurrentPosition(movieDetails, currentPosition)
+        viewModel.saveCurrentPosition(mediaDetails, currentPosition, mediaType)
         onBackPressed()
     })
 
@@ -198,12 +203,12 @@ fun VideoPlayerScreenContent(
                 it.subtitleView?.updateSubtitleVisibility(subtitlesVisible)
                 when (lifecycle) {
                     Lifecycle.Event.ON_CREATE -> {
-                        viewModel.playVideo(movieDetails, startFromBeginning)
+                        viewModel.playVideo(mediaDetails, startFromBeginning, mediaType)
                         Log.d("VideoPlayerScreen", "Lifecycle.Event.ON_CREATE")
                     }
 
                     Lifecycle.Event.ON_PAUSE -> {
-                        viewModel.saveCurrentPosition(movieDetails, currentPosition)
+                        viewModel.saveCurrentPosition(mediaDetails, currentPosition, mediaType)
                         it.onPause()
                         it.player?.pause()
                     }
@@ -230,7 +235,7 @@ fun VideoPlayerScreenContent(
             subtitles = { },
             controls = {
                 VideoPlayerControls(
-                    movieDetails,
+                    mediaDetails,
                     isPlaying,
                     currentPosition,
                     player,
@@ -266,7 +271,7 @@ fun SubtitleOverlay(subtitleText: String, modifier: Modifier = Modifier) {
 @OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerControls(
-    movieDetails: MovieDetails,
+    mediaDetails: MediaDetails,
     isPlaying: Boolean,
     contentCurrentPosition: Long,
     exoPlayer: ExoPlayer,
@@ -285,9 +290,9 @@ fun VideoPlayerControls(
     VideoPlayerMainFrame(
         mediaTitle = {
             VideoPlayerMediaTitle(
-                title = movieDetails.name,
-                secondaryText = movieDetails.releaseDate,
-                tertiaryText = movieDetails.director,
+                title = mediaDetails.name,
+                secondaryText = mediaDetails.releaseDate,
+                tertiaryText = "",
                 type = VideoPlayerMediaTitleType.DEFAULT
             )
         },

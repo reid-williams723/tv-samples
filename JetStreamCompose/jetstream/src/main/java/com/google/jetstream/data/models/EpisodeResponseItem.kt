@@ -10,6 +10,8 @@ data class EpisodeResponseItem(
     val episodeNumber: Int,
     val overview: String,
     val stillPath: String,
+    val duration: String,
     val releaseDate: String,
-    val duration: String
+    val videoUri: String,
+    val subtitleUri: String
 )

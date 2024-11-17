@@ -27,6 +27,7 @@ import com.google.jetstream.data.repositories.ShowRepository
 import com.google.jetstream.data.repositories.ShowRepositoryImpl
 import com.google.jetstream.data.room.AppDatabase
 import com.google.jetstream.data.room.dao.MovieProgressDao
+import com.google.jetstream.data.room.dao.ShowProgressDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -78,6 +79,11 @@ object DatabaseModule {
     @Provides
     fun provideMovieProgressDao(database: AppDatabase): MovieProgressDao {
         return database.movieProgressDao()
+    }
+
+    @Provides
+    fun provideShowProgressDao(database: AppDatabase): ShowProgressDao {
+        return database.showProgressDao()
     }
 }
 

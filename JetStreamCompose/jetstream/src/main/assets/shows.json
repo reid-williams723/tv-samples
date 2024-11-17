@@ -28,7 +28,7 @@
             "stillPath": "/still_path_episode_1.jpg",
             "duration": "22min",
             "releaseDate": "October 21, 2024",
-            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv",
             "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
@@ -40,7 +40,7 @@
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
             "releaseDate": "October 21, 2024",
-            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv",
             "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           }
         ]
@@ -59,7 +59,7 @@
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
             "releaseDate": "October 21, 2024",
-            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv",
             "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
@@ -71,19 +71,103 @@
             "stillPath": "/still_path_episode_2.jpg",
             "duration": "22min",
             "releaseDate": "October 21, 2024",
-            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "Show B",
+    "overview": "This is a description of Show B.",
+    "posterPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/16_9-400/inventor.jpg",
+    "backdropPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/2_3-300/inventor.jpg",
+    "genres": [
+      "Sci-Fi",
+      "Action"
+    ],
+    "firstAirDate": "2024-03-15",
+    "lastAirDate": "2024-06-28",
+    "numberOfSeasons": 1,
+    "numberOfEpisodes": 10,
+    "seasons": [
+      {
+        "id": "3",
+        "seasonNumber": 1,
+        "releaseDate": "2024-03-15",
+        "episodes": [
+          {
+            "id": "201",
+            "title": "Episode 1",
+            "seasonNumber": 1,
+            "episodeNumber": 1,
+            "overview": "Episode 1 overview.",
+            "stillPath": "/still_path_episode_1.jpg",
+            "duration": "45min",
+            "releaseDate": "March 15, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv",
             "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           },
           {
-            "id": "105",
-            "title": "Episode 5",
+            "id": "202",
+            "title": "Episode 2",
             "seasonNumber": 1,
             "episodeNumber": 2,
             "overview": "Episode 2 overview.",
             "stillPath": "/still_path_episode_2.jpg",
-            "duration": "22min",
-            "releaseDate": "October 21, 2024",
-            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office Space.mkv",
+            "duration": "45min",
+            "releaseDate": "March 22, 2024",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Show C",
+    "overview": "This is a description of Show C.",
+    "posterPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/16_9-400/night-in-tokyo.jpg",
+    "backdropPath": "https://storage.googleapis.com/androiddevelopers/samples/media/posters/2_3-300/night-in-tokyo.jpg",
+    "genres": [
+      "Documentary",
+      "Nature"
+    ],
+    "firstAirDate": "2023-09-05",
+    "lastAirDate": "2023-10-26",
+    "numberOfSeasons": 1,
+    "numberOfEpisodes": 6,
+    "seasons": [
+      {
+        "id": "4",
+        "seasonNumber": 1,
+        "releaseDate": "2023-09-05",
+        "episodes": [
+          {
+            "id": "301",
+            "title": "Episode 1",
+            "seasonNumber": 1,
+            "episodeNumber": 1,
+            "overview": "Episode 1 overview.",
+            "stillPath": "/still_path_episode_1.jpg",
+            "duration": "60min",
+            "releaseDate": "September 5, 2023",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E1.mkv",
+            "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
+          },
+          {
+            "id": "302",
+            "title": "Episode 2",
+            "seasonNumber": 1,
+            "episodeNumber": 2,
+            "overview": "Episode 2 overview.",
+            "stillPath": "/still_path_episode_2.jpg",
+            "duration": "60min",
+            "releaseDate": "September 12, 2023",
+            "videoUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/The Office S1E2.mkv",
             "subtitleUri": "/storage/emulated/0/Android/data/com.google.jetstream/files/Office.Space.srt"
           }
         ]

@@ -1,6 +1,5 @@
 package com.google.jetstream.presentation.screens.shows
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
@@ -13,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -47,7 +47,9 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.google.jetstream.R
+import com.google.jetstream.data.entities.Episode
 import com.google.jetstream.data.entities.Show
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.presentation.common.Error
 import com.google.jetstream.presentation.common.Loading
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
@@ -61,7 +63,9 @@ object ShowDetailsScreen {
 
 @Composable
 fun ShowDetailsScreen(
-    goToShowPlayer: () -> Unit,
+    goToEpisodePlayer: (String ,Boolean, MediaType, String) -> Unit,
+    goToShowPlayerBegin: (String, Boolean, MediaType, String) -> Unit,
+    goToShowPlayerResume: (String, Boolean, MediaType, String) -> Unit,
     showDetailsScreenViewModel: ShowDetailsScreenViewModel = hiltViewModel()
 ) {
     val uiState by showDetailsScreenViewModel.uiState.collectAsStateWithLifecycle()
@@ -74,11 +78,33 @@ fun ShowDetailsScreen(
         is ShowDetailsScreenUiState.Error -> {
             Error(modifier = Modifier.fillMaxSize())
         }
-
         is ShowDetailsScreenUiState.Done -> {
-            ShowDetails(
-                goToShowPlayer = goToShowPlayer,
+            Details(
+                goToEpisodePlayer = goToEpisodePlayer,
+                goToShowPlayerResume = {
+                    s.showProgress?.let {
+                        goToShowPlayerResume(
+                            it.episodeId,
+                            false,
+                            MediaType.Show,
+                            s.show.id
+                        )
+                    }
+                },
+                goToShowPlayerBegin = {
+                    s.showProgress?.let {
+                        s.firstEpisode?.let { it1 ->
+                            goToShowPlayerBegin(
+                                it1.id,
+                                true,
+                                MediaType.Show,
+                                s.show.id
+                            )
+                        }
+                    }
+                },
                 showDetails = s.show,
+                currentEpisode = s.currentEpisode,
                 modifier = Modifier
                     .fillMaxSize()
                     .animateContentSize()
@@ -88,11 +114,14 @@ fun ShowDetailsScreen(
 }
 
 @Composable
-private fun ShowDetails(
-    goToShowPlayer: () -> Unit,
+private fun Details(
+    goToEpisodePlayer: (String ,Boolean, MediaType, String) -> Unit,
+    goToShowPlayerBegin: () -> Unit,
+    goToShowPlayerResume: () -> Unit,
     showDetails: Show,
     modifier: Modifier = Modifier,
     currentEpisodeProgress: Long = 0,
+    currentEpisode: Episode? = null
 ) {
 
     val viewModel = hiltViewModel<ShowDetailsScreenViewModel>()
@@ -110,11 +139,13 @@ private fun ShowDetails(
         item {
             ShowDetails(
                 showDetails = showDetails,
-                goToShowPlayer = goToShowPlayer
+                goToShowPlayerBegin = goToShowPlayerBegin,
+                goToShowPlayerResume = goToShowPlayerResume,
+                currentEpisode = currentEpisode
             )
         }
         items(showDetails.seasons) { season ->
-            ShowDetailsScreenSeasonList(season = season, onEpisodeClick = {})
+            ShowDetailsScreenSeasonList(showId = showDetails.id, season = season, onEpisodeClick = goToEpisodePlayer)
         }
     }
 }
@@ -125,7 +156,9 @@ private val BottomDividerPadding = PaddingValues(vertical = 48.dp)
 @Composable
 private fun ShowDetails(
     showDetails: Show,
-    goToShowPlayer: () -> Unit
+    goToShowPlayerBegin: () -> Unit,
+    goToShowPlayerResume: () -> Unit,
+    currentEpisode: Episode? = null
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
@@ -165,13 +198,26 @@ private fun ShowDetails(
 
                 // Row for Play button
                 Row {
+                    if (currentEpisode != null) {
+                        ContinueWatchingButton(
+                            modifier = Modifier.onFocusChanged {
+                                if (it.isFocused) {
+                                    coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                                }
+                            },
+                            goToShowPlayerResume = goToShowPlayerResume,
+                            currentEpisode = currentEpisode
+                        )
+                        Spacer(modifier = Modifier.width(16.dp)) // Add horizontal padding
+                    }
+
                     WatchShowButton(
                         modifier = Modifier.onFocusChanged {
                             if (it.isFocused) {
                                 coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
                             }
                         },
-                        goToShowPlayer = goToShowPlayer
+                        goToShowPlayerBegin = goToShowPlayerBegin
                     )
                 }
             }
@@ -251,10 +297,10 @@ private fun DotSeparatedRow(
 @Composable
 private fun WatchShowButton(
     modifier: Modifier = Modifier,
-    goToShowPlayer: () -> Unit
+    goToShowPlayerBegin: () -> Unit
 ) {
     Button(
-        onClick = goToShowPlayer,
+        onClick = goToShowPlayerBegin,
         modifier = modifier.padding(top = 24.dp),
         contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
         shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
@@ -266,6 +312,30 @@ private fun WatchShowButton(
         Spacer(Modifier.size(8.dp))
         Text(
             text = stringResource(R.string.watch_now),
+            style = MaterialTheme.typography.titleSmall
+        )
+    }
+}
+
+@Composable
+private fun ContinueWatchingButton(
+    modifier: Modifier = Modifier,
+    goToShowPlayerResume: () -> Unit,
+    currentEpisode: Episode
+) {
+    Button(
+        onClick = goToShowPlayerResume,
+        modifier = modifier.padding(top = 24.dp),
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+        shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.PlayArrow,
+            contentDescription = null
+        )
+        Spacer(Modifier.size(8.dp))
+        Text(
+            text = "Continue Watching S${currentEpisode.seasonNumber}E${currentEpisode.episodeNumber}",
             style = MaterialTheme.typography.titleSmall
         )
     }

@@ -41,6 +41,7 @@ import androidx.tv.material3.MaterialTheme
 import com.google.jetstream.R
 import com.google.jetstream.data.entities.Movie
 import com.google.jetstream.data.entities.MovieDetails
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.presentation.screens.movies.MovieDetails
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Error
@@ -55,8 +56,8 @@ object MovieDetailsScreen {
 
 @Composable
 fun MovieDetailsScreen(
-    goToMoviePlayerBegin: (String, Boolean) -> Unit,
-    goToMoviePlayerResume: (String, Boolean) -> Unit,
+    goToMoviePlayerBegin: (String, Boolean, String, String?) -> Unit,
+    goToMoviePlayerResume: (String, Boolean, String, String?) -> Unit,
     onBackPressed: () -> Unit,
     refreshScreenWithNewMovie: (Movie) -> Unit,
     movieDetailsScreenViewModel: MovieDetailsScreenViewModel = hiltViewModel()
@@ -76,8 +77,8 @@ fun MovieDetailsScreen(
             Details(
                 movieDetails = s.movieDetails,
                 currentMovieProgress = s.progress,
-                goToMoviePlayerBegin = { goToMoviePlayerBegin(s.movieDetails.id, true) },
-                goToMoviePlayerResume = { goToMoviePlayerResume(s.movieDetails.id, false) },
+                goToMoviePlayerBegin = { goToMoviePlayerBegin(s.movieDetails.id, true, MediaType.Movie.name, null) },
+                goToMoviePlayerResume = { goToMoviePlayerResume(s.movieDetails.id, false, MediaType.Movie.name, null) },
                 onBackPressed = onBackPressed,
                 refreshScreenWithNewMovie = refreshScreenWithNewMovie,
                 modifier = Modifier

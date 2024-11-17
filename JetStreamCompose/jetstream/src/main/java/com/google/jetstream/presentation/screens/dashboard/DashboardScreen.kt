@@ -264,7 +264,7 @@ private fun Body(
         }
         composable(Screens.Shows()) {
             ShowsScreen(
-                onShowClick = { show -> openShowDetailsScreen(show.id) },
+                    onShowClick = { show -> openShowDetailsScreen(show.id) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,6 +42,7 @@ import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.google.jetstream.data.entities.Episode
 import com.google.jetstream.data.entities.Season
+import com.google.jetstream.data.enum.MediaType
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
 import com.google.jetstream.presentation.theme.JetStreamBorderWidth
@@ -50,11 +50,12 @@ import com.google.jetstream.presentation.theme.JetStreamBorderWidth
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ShowDetailsScreenSeasonList(
+    showId: String,
     modifier: Modifier = Modifier,
     season: Season,
     startPadding: Dp = rememberChildPadding().start,
     endPadding: Dp = rememberChildPadding().end,
-    onEpisodeClick: (episode: Episode) -> Unit,
+    onEpisodeClick: (String ,Boolean, MediaType, String) -> Unit,
     titleStyle: TextStyle = MaterialTheme.typography.headlineLarge.copy(
         fontWeight = FontWeight.Medium,
         fontSize = 30.sp
@@ -102,7 +103,14 @@ fun ShowDetailsScreenSeasonList(
                     EpisodeListItem(
                         modifier = itemModifier,
                         itemWidth = 432.dp,
-                        onEpisodeClick = onEpisodeClick,
+                        onEpisodeClick = {
+                            onEpisodeClick(
+                                episode.id,
+                                true,
+                                MediaType.Show,
+                                showId
+                            )
+                        },
                         episode = episode,
                     )
                 }
