@@ -73,3 +73,30 @@ internal suspend fun readMovieCategoryData(
         Json.decodeFromString<List<MovieCategoriesResponseItem>>(it)
     }.getOrDefault(emptyList())
 }
+
+internal suspend fun readMovieData(
+    fileReader: FileReader,
+    fileName: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+): List<MoviesResponseItem> = withContext(dispatcher) {
+    val jsonData = fileReader.readJsonData(fileName)
+    Json.decodeFromString<List<MoviesResponseItem>>(jsonData)
+}
+
+internal suspend fun readMovieCastData(
+    fileReader: FileReader,
+    fileName: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+): List<MovieCastResponseItem> = withContext(dispatcher) {
+    val jsonData = fileReader.readJsonData(fileName)
+    Json.decodeFromString<List<MovieCastResponseItem>>(jsonData)
+}
+
+internal suspend fun readMovieCategoryData(
+    fileReader: FileReader,
+    fileName: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+): List<MovieCategoriesResponseItem> = withContext(dispatcher) {
+    val jsonData = fileReader.readJsonData(fileName)
+    Json.decodeFromString<List<MovieCategoriesResponseItem>>(jsonData)
+}

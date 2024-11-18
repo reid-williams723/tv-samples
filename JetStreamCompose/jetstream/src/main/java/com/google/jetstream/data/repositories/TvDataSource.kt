@@ -23,10 +23,11 @@ import com.google.jetstream.data.util.StringConstants
 import javax.inject.Inject
 
 class TvDataSource @Inject constructor(
-    assetsReader: AssetsReader
+    assetsReader: AssetsReader,
+    fileReader: FileReader
 ) {
     private val mostPopularTvShowsReader = CachedDataReader {
-        readMovieData(assetsReader, StringConstants.Assets.MostPopularTVShows)
+        readMovieData(fileReader, StringConstants.Assets.MostPopularTVShows)
     }
 
     suspend fun getTvShowList() = mostPopularTvShowsReader.read().subList(0, 5).map {

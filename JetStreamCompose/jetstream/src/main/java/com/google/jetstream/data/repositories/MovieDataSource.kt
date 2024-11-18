@@ -23,15 +23,15 @@ import com.google.jetstream.data.util.StringConstants
 import javax.inject.Inject
 
 class MovieDataSource @Inject constructor(
-    assetsReader: AssetsReader
+    assetsReader: AssetsReader,
+    fileReader: FileReader
 ) {
-
     private val top250MovieDataReader = CachedDataReader {
-        readMovieData(assetsReader, StringConstants.Assets.Top250Movies)
+        readMovieData(fileReader, StringConstants.Assets.Top250Movies)
     }
 
     private val mostPopularMovieDataReader = MovieDataReader {
-        readMovieData(assetsReader, StringConstants.Assets.MostPopularMovies).map {
+        readMovieData(fileReader, StringConstants.Assets.MostPopularMovies).map {
             it.toMovie()
         }
     }
@@ -49,7 +49,7 @@ class MovieDataSource @Inject constructor(
     }
 
     private val nowPlayingMovieDataReader: MovieDataReader = MovieDataReader {
-        readMovieData(assetsReader, StringConstants.Assets.InTheaters).subList(0, 10).map {
+        readMovieData(fileReader, StringConstants.Assets.InTheaters).subList(0, 10).map {
             it.toMovie()
         }
     }

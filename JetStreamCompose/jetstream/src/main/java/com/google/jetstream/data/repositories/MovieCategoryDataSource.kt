@@ -22,11 +22,12 @@ import com.google.jetstream.data.util.StringConstants
 import javax.inject.Inject
 
 class MovieCategoryDataSource @Inject constructor(
-    assetsReader: AssetsReader
+    assetsReader: AssetsReader,
+    fileReader: FileReader
 ) {
 
     private val movieCategoryDataReader = CachedDataReader {
-        readMovieCategoryData(assetsReader, StringConstants.Assets.MovieCategories).map {
+        readMovieCategoryData(fileReader, StringConstants.Assets.MovieCategories).map {
             it.toMovieCategory()
         }
     }
