@@ -19,7 +19,9 @@ package com.google.jetstream.presentation.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.jetstream.data.entities.MovieList
+import com.google.jetstream.data.entities.ShowList
 import com.google.jetstream.data.repositories.MovieRepository
+import com.google.jetstream.data.repositories.ShowRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,19 +30,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
-class HomeScreeViewModel @Inject constructor(movieRepository: MovieRepository) : ViewModel() {
+class HomeScreeViewModel @Inject constructor(
+    movieRepository: MovieRepository,
+    showRepository: ShowRepository
+) : ViewModel() {
 
     val uiState: StateFlow<HomeScreenUiState> = combine(
         movieRepository.getFeaturedMovies(),
-        movieRepository.getTrendingMovies(),
-        movieRepository.getTop10Movies(),
-        movieRepository.getNowPlayingMovies(),
-    ) { featuredMovieList, trendingMovieList, top10MovieList, nowPlayingMovieList ->
+        showRepository.getShows()
+    ) { movieList, showList ->
         HomeScreenUiState.Ready(
-            featuredMovieList,
-            trendingMovieList,
-            top10MovieList,
-            nowPlayingMovieList
+            movieList,
+            showList,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -53,9 +54,7 @@ sealed interface HomeScreenUiState {
     data object Loading : HomeScreenUiState
     data object Error : HomeScreenUiState
     data class Ready(
-        val featuredMovieList: MovieList,
-        val trendingMovieList: MovieList,
-        val top10MovieList: MovieList,
-        val nowPlayingMovieList: MovieList
+        val movieList: MovieList,
+        val showList: ShowList,
     ) : HomeScreenUiState
 }

@@ -41,11 +41,14 @@ import androidx.tv.material3.MaterialTheme
 import com.google.jetstream.R
 import com.google.jetstream.data.entities.Movie
 import com.google.jetstream.data.entities.MovieDetails
+import com.google.jetstream.data.enum.MediaType
+import com.google.jetstream.presentation.screens.movies.MovieDetails
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Error
 import com.google.jetstream.presentation.common.Loading
 import com.google.jetstream.presentation.common.MoviesRow
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
+import com.google.jetstream.presentation.screens.videoPlayer.VideoPlayerScreenViewModel
 
 object MovieDetailsScreen {
     const val MovieIdBundleKey = "movieId"
@@ -53,7 +56,8 @@ object MovieDetailsScreen {
 
 @Composable
 fun MovieDetailsScreen(
-    goToMoviePlayer: () -> Unit,
+    goToMoviePlayerBegin: (String, Boolean, String, String?) -> Unit,
+    goToMoviePlayerResume: (String, Boolean, String, String?) -> Unit,
     onBackPressed: () -> Unit,
     refreshScreenWithNewMovie: (Movie) -> Unit,
     movieDetailsScreenViewModel: MovieDetailsScreenViewModel = hiltViewModel()
@@ -72,7 +76,9 @@ fun MovieDetailsScreen(
         is MovieDetailsScreenUiState.Done -> {
             Details(
                 movieDetails = s.movieDetails,
-                goToMoviePlayer = goToMoviePlayer,
+                currentMovieProgress = s.progress,
+                goToMoviePlayerBegin = { goToMoviePlayerBegin(s.movieDetails.id, true, MediaType.Movie.name, null) },
+                goToMoviePlayerResume = { goToMoviePlayerResume(s.movieDetails.id, false, MediaType.Movie.name, null) },
                 onBackPressed = onBackPressed,
                 refreshScreenWithNewMovie = refreshScreenWithNewMovie,
                 modifier = Modifier
@@ -86,11 +92,14 @@ fun MovieDetailsScreen(
 @Composable
 private fun Details(
     movieDetails: MovieDetails,
-    goToMoviePlayer: () -> Unit,
+    currentMovieProgress: Long = 0,
+    goToMoviePlayerBegin: () -> Unit,
+    goToMoviePlayerResume: () -> Unit,
     onBackPressed: () -> Unit,
     refreshScreenWithNewMovie: (Movie) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val viewModel = hiltViewModel<MovieDetailsScreenViewModel>()
     val childPadding = rememberChildPadding()
 
     BackHandler(onBack = onBackPressed)
@@ -101,7 +110,9 @@ private fun Details(
         item {
             MovieDetails(
                 movieDetails = movieDetails,
-                goToMoviePlayer = goToMoviePlayer
+                currentMovieProgress = currentMovieProgress,
+                goToMoviePlayerBegin = goToMoviePlayerBegin,
+                goToMoviePlayerResume = goToMoviePlayerResume
             )
         }
 

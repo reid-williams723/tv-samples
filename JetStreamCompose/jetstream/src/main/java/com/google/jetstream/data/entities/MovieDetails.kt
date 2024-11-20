@@ -36,5 +36,6 @@ data class MovieDetails(
     val budget: String,
     val revenue: String,
     val similarMovies: MovieList,
-    val reviewsAndRatings: List<MovieReviewsAndRatings>
+    val reviewsAndRatings: List<MovieReviewsAndRatings>,
+    val runtimeMins: Int
 )

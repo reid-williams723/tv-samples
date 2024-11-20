@@ -85,6 +85,7 @@ fun rememberChildPadding(direction: LayoutDirection = LocalLayoutDirection.curre
 fun DashboardScreen(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
+    openShowDetailsScreen: (showId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
     isComingBackFromDifferentScreen: Boolean,
     resetIsComingBackFromDifferentScreen: () -> Unit,
@@ -189,6 +190,7 @@ fun DashboardScreen(
         Body(
             openCategoryMovieList = openCategoryMovieList,
             openMovieDetailsScreen = openMovieDetailsScreen,
+            openShowDetailsScreen = openShowDetailsScreen,
             openVideoPlayer = openVideoPlayer,
             updateTopBarVisibility = { isTopBarVisible = it },
             isTopBarVisible = isTopBarVisible,
@@ -222,6 +224,7 @@ private fun BackPressHandledArea(
 private fun Body(
     openCategoryMovieList: (categoryId: String) -> Unit,
     openMovieDetailsScreen: (movieId: String) -> Unit,
+    openShowDetailsScreen: (showId: String) -> Unit,
     openVideoPlayer: (Movie) -> Unit,
     updateTopBarVisibility: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
@@ -241,6 +244,7 @@ private fun Body(
                 onMovieClick = { selectedMovie ->
                     openMovieDetailsScreen(selectedMovie.id)
                 },
+                onShowClick = { show -> openShowDetailsScreen(show.id) },
                 goToVideoPlayer = openVideoPlayer,
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
@@ -261,7 +265,7 @@ private fun Body(
         }
         composable(Screens.Shows()) {
             ShowsScreen(
-                onTVShowClick = { movie -> openMovieDetailsScreen(movie.id) },
+                onShowClick = { show -> openShowDetailsScreen(show.id) },
                 onScroll = updateTopBarVisibility,
                 isTopBarVisible = isTopBarVisible
             )

@@ -17,9 +17,11 @@
 package com.google.jetstream.data.repositories
 
 import com.google.jetstream.data.entities.Movie
+import com.google.jetstream.data.entities.Show
 import com.google.jetstream.data.models.MovieCastResponseItem
 import com.google.jetstream.data.models.MovieCategoriesResponseItem
 import com.google.jetstream.data.models.MoviesResponseItem
+import com.google.jetstream.data.models.ShowsResponseItem
 import com.google.jetstream.data.util.AssetsReader
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -100,3 +102,13 @@ internal suspend fun readMovieCategoryData(
     val jsonData = fileReader.readJsonData(fileName)
     Json.decodeFromString<List<MovieCategoriesResponseItem>>(jsonData)
 }
+internal suspend fun readShowData(
+    fileReader: FileReader,
+    resourceId: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO
+): List<ShowsResponseItem> = withContext(dispatcher) {
+    val jsonData = fileReader.readJsonData(fileName)
+    Json.decodeFromString<List<ShowsResponseItem>>(jsonData)
+}
+
+

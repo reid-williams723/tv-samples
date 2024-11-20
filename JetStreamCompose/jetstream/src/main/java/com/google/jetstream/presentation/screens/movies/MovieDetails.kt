@@ -16,7 +16,9 @@
 
 package com.google.jetstream.presentation.screens.movies
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.material.icons.Icons
@@ -33,6 +36,7 @@ import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
@@ -44,6 +48,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Button
@@ -58,18 +64,21 @@ import com.google.jetstream.data.entities.MovieDetails
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
 import com.google.jetstream.presentation.theme.JetStreamButtonShape
+import com.google.jetstream.presentation.theme.JetStreamTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MovieDetails(
+    goToMoviePlayerBegin: () -> Unit,
+    goToMoviePlayerResume: () -> Unit,
     movieDetails: MovieDetails,
-    goToMoviePlayer: () -> Unit
+    currentMovieProgress: Long = 0,
 ) {
     val childPadding = rememberChildPadding()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
-
+    val percentageProgress = (currentMovieProgress.toFloat() / (movieDetails.runtimeMins * 60 * 1000))
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,16 +116,87 @@ fun MovieDetails(
                         music = movieDetails.music
                     )
                 }
-                WatchTrailerButton(
-                    modifier = Modifier.onFocusChanged {
-                        if (it.isFocused) {
-                            coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
-                        }
-                    },
-                    goToMoviePlayer = goToMoviePlayer
-                )
+                Row() { // Add padding to the Row
+                    if (currentMovieProgress > 0) {
+                        ContinueWatchingButton(
+                            modifier = Modifier.onFocusChanged {
+                                if (it.isFocused) {
+                                    coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                                }
+                            },
+                            goToMoviePlayer = goToMoviePlayerResume,
+                            progress = percentageProgress
+                        )
+                        Spacer(modifier = Modifier.width(16.dp)) // Add horizontal padding
+                    }
+                    WatchTrailerButton(
+                        modifier = Modifier.onFocusChanged {
+                            if (it.isFocused) {
+                                coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+                            }
+                        },
+                        goToMoviePlayer = goToMoviePlayerBegin
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun ContinueWatchingButton(
+    modifier: Modifier = Modifier,
+    goToMoviePlayer: () -> Unit,
+    progress: Float
+) {
+    Button(
+        onClick = goToMoviePlayer,
+        modifier = modifier.padding(top = 24.dp),
+        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+        shape = ButtonDefaults.shape(shape = JetStreamButtonShape)
+    ) {
+//        Box(modifier = Modifier.fillMaxSize()) {
+//            // Content inside the button
+//            Row(
+//                modifier = Modifier
+//                    .align(Alignment.Center)
+//                    .padding(bottom = 4.dp), // Adjust padding to keep space for progress bar
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Outlined.PlayArrow,
+//                    contentDescription = null
+//                )
+//                Spacer(Modifier.size(8.dp))
+//                Text(
+//                    text = stringResource(R.string.continue_watching),
+//                    style = MaterialTheme.typography.titleSmall
+//                )
+//                ProgressBarIndicator(
+//                    progress = 0.5f
+//                )
+//            }
+//
+//        }
+        Column() {
+            Row() {
+                Icon(
+                    imageVector = Icons.Outlined.PlayArrow,
+                    contentDescription = null
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    text = stringResource(R.string.continue_watching),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
+
+            ProgressBarIndicator(
+                progress = progress
+            )
+        }
+
+
     }
 }
 
@@ -137,7 +217,7 @@ private fun WatchTrailerButton(
         )
         Spacer(Modifier.size(8.dp))
         Text(
-            text = stringResource(R.string.watch_trailer),
+            text = stringResource(R.string.watch_now),
             style = MaterialTheme.typography.titleSmall
         )
     }
@@ -237,3 +317,27 @@ private fun MovieImageWithGradients(
         }
     )
 }
+
+@Composable
+fun ProgressBarIndicator(
+    progress: Float, // Value between 0.0 and 1.0
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    progressColor: Color = MaterialTheme.colorScheme.primary,
+    height: Dp = 4.dp
+) {
+    Canvas(modifier = modifier.height(height).width(170.dp)) {
+        // Draw the background bar
+        drawRect(
+            color = backgroundColor,
+            size = size.copy(width = size.width, height = size.height)
+        )
+
+        // Draw the progress bar
+        drawRect(
+            color = progressColor,
+            size = size.copy(width = size.width * progress, height = size.height)
+        )
+    }
+}
+

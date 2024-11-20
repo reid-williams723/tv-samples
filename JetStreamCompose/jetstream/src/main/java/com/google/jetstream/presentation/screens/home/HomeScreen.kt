@@ -37,14 +37,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.jetstream.data.entities.Movie
 import com.google.jetstream.data.entities.MovieList
+import com.google.jetstream.data.entities.Show
+import com.google.jetstream.data.entities.ShowList
 import com.google.jetstream.data.util.StringConstants
 import com.google.jetstream.presentation.common.Error
 import com.google.jetstream.presentation.common.Loading
 import com.google.jetstream.presentation.common.MoviesRow
+import com.google.jetstream.presentation.common.ShowsRow
 import com.google.jetstream.presentation.screens.dashboard.rememberChildPadding
 
 @Composable
 fun HomeScreen(
+    onShowClick: (show: Show) -> Unit,
     onMovieClick: (movie: Movie) -> Unit,
     goToVideoPlayer: (movie: Movie) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
@@ -56,15 +60,14 @@ fun HomeScreen(
     when (val s = uiState) {
         is HomeScreenUiState.Ready -> {
             Catalog(
-                featuredMovies = s.featuredMovieList,
-                trendingMovies = s.trendingMovieList,
-                top10Movies = s.top10MovieList,
-                nowPlayingMovies = s.nowPlayingMovieList,
+                movies = s.movieList,
+                shows = s.showList,
                 onMovieClick = onMovieClick,
                 onScroll = onScroll,
                 goToVideoPlayer = goToVideoPlayer,
                 isTopBarVisible = isTopBarVisible,
                 modifier = Modifier.fillMaxSize(),
+                onShowClick = onShowClick
             )
         }
 
@@ -75,10 +78,9 @@ fun HomeScreen(
 
 @Composable
 private fun Catalog(
-    featuredMovies: MovieList,
-    trendingMovies: MovieList,
-    top10Movies: MovieList,
-    nowPlayingMovies: MovieList,
+    movies: MovieList,
+    shows: ShowList,
+    onShowClick: (show: Show) -> Unit,
     onMovieClick: (movie: Movie) -> Unit,
     onScroll: (isTopBarVisible: Boolean) -> Unit,
     goToVideoPlayer: (movie: Movie) -> Unit,
@@ -111,43 +113,45 @@ private fun Catalog(
         modifier = modifier,
     ) {
 
-        item(contentType = "FeaturedMoviesCarousel") {
-            FeaturedMoviesCarousel(
-                movies = featuredMovies,
-                padding = childPadding,
-                goToVideoPlayer = goToVideoPlayer,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(324.dp)
-                /*
-                 Setting height for the FeaturedMovieCarousel to keep it rendered with same height,
-                 regardless of the top bar's visibility
-                 */
-            )
-        }
+//        item(contentType = "FeaturedMoviesCarousel") {
+//            FeaturedMoviesCarousel(
+//                movies = featuredMovies,
+//                padding = childPadding,
+//                goToVideoPlayer = goToVideoPlayer,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(324.dp)
+//                /*
+//                 Setting height for the FeaturedMovieCarousel to keep it rendered with same height,
+//                 regardless of the top bar's visibility
+//                 */
+//            )
+//        }
         item(contentType = "MoviesRow") {
             MoviesRow(
                 modifier = Modifier.padding(top = 16.dp),
-                movieList = trendingMovies,
-                title = StringConstants.Composable.HomeScreenTrendingTitle,
+                movieList = movies,
+//                title = StringConstants.Composable.HomeScreenTrendingTitle,
+                title = "Movies",
                 onMovieSelected = onMovieClick
             )
         }
-        item(contentType = "Top10MoviesList") {
-            Top10MoviesList(
-                movieList = top10Movies,
-                onMovieClick = onMovieClick,
-                modifier = Modifier.onFocusChanged {
-                    immersiveListHasFocus = it.hasFocus
-                },
-            )
-        }
-        item(contentType = "MoviesRow") {
-            MoviesRow(
+//        item(contentType = "Top10MoviesList") {
+//            Top10MoviesList(
+//                movieList = top10Movies,
+//                onMovieClick = onMovieClick,
+//                modifier = Modifier.onFocusChanged {
+//                    immersiveListHasFocus = it.hasFocus
+//                },
+//            )
+//        }
+        item(contentType = "ShowsRow") {
+            ShowsRow(
                 modifier = Modifier.padding(top = 16.dp),
-                movieList = nowPlayingMovies,
-                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
-                onMovieSelected = onMovieClick
+                showList = shows,
+//                title = StringConstants.Composable.HomeScreenNowPlayingMoviesTitle,
+                title = "TV Shows",
+                onShowSelected = onShowClick
             )
         }
     }
