@@ -51,6 +51,6 @@ class DirectoryProvider @Inject constructor(
     // Example method to validate metadata (you can customize this logic)
     private fun isValidMetadata(metadata: String): Boolean {
         // Logic to determine if the metadata is valid
-        return metadata.contains("DeviceID=1235") // Just an example
+        return metadata.contains("DeviceID=12345") // Just an example
     }
 }
