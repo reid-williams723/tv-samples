@@ -6,11 +6,11 @@ import com.google.jetstream.data.util.StringConstants
 import javax.inject.Inject
 
 class ShowDataSource @Inject constructor(
-    assetsReader: AssetsReader
+    fileReader: FileReader
 ) {
 
     private val showsDataReader = CachedDataReader {
-        readShowData(assetsReader, StringConstants.Assets.Shows)
+        readShowData(fileReader, StringConstants.Assets.Shows)
     }
 
     suspend fun getShowsList() =

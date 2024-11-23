@@ -104,7 +104,7 @@ internal suspend fun readMovieCategoryData(
 }
 internal suspend fun readShowData(
     fileReader: FileReader,
-    resourceId: String,
+    fileName: String,
     dispatcher: CoroutineDispatcher = Dispatchers.IO
 ): List<ShowsResponseItem> = withContext(dispatcher) {
     val jsonData = fileReader.readJsonData(fileName)

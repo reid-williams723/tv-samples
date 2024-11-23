@@ -45,11 +45,6 @@ class DirectoryProvider @Inject constructor(
                 Log.e("DirectoryProvider", "Metadata file not found in ${dir.absolutePath}")
             }
         }
-        try {
-            externalPath ?: throw IllegalStateException("No valid external directory found")
-        } catch (e: IllegalStateException) {
-            e.message?.let { showErrorDialog(it, context) }
-        }
         externalPath ?: throw IllegalStateException("No valid external directory found")
     }
 
@@ -57,19 +52,5 @@ class DirectoryProvider @Inject constructor(
     private fun isValidMetadata(metadata: String): Boolean {
         // Logic to determine if the metadata is valid
         return metadata.contains("DeviceID=1235") // Just an example
-    }
-
-    fun showErrorDialog(exceptionMessage: String, context: Context) {
-        val dialog = AlertDialog.Builder(context)
-            .setTitle("Error")
-            .setMessage(exceptionMessage)
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-                (context as? Activity)?.finish() // Close the activity after dismissing
-            }
-            .setCancelable(false)
-            .create()
-
-        dialog.show()
     }
 }
