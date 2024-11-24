@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -82,7 +83,7 @@ fun MovieDetails(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(432.dp)
+            .fillMaxHeight()
             .bringIntoViewRequester(bringIntoViewRequester)
     ) {
         MovieImageWithGradients(
@@ -90,30 +91,30 @@ fun MovieDetails(
             modifier = Modifier.fillMaxSize()
         )
 
-        Column(modifier = Modifier.fillMaxWidth(0.55f)) {
+        Column(modifier = Modifier.fillMaxWidth(0.55f)
+            .align(Alignment.CenterStart)
+        ) {
             Spacer(modifier = Modifier.height(108.dp))
             Column(
                 modifier = Modifier.padding(start = childPadding.start)
             ) {
-                MovieLargeTitle(movieTitle = movieDetails.name)
+                MovieLargeTitle(movieTitle = movieDetails.fullTitle)
 
                 Column(
                     modifier = Modifier.alpha(0.75f)
                 ) {
-                    MovieDescription(description = movieDetails.description)
+                    MovieDescription(description = movieDetails.plot)
                     DotSeparatedRow(
                         modifier = Modifier.padding(top = 20.dp),
                         texts = listOf(
-                            movieDetails.pgRating,
+                            movieDetails.contentRating,
                             movieDetails.releaseDate,
-                            movieDetails.categories.joinToString(", "),
-                            movieDetails.duration
+                            movieDetails.genres.joinToString(", "),
+                            movieDetails.runtimeStr
                         )
                     )
                     DirectorScreenplayMusicRow(
-                        director = movieDetails.director,
-                        screenplay = movieDetails.screenplay,
-                        music = movieDetails.music
+                        director = movieDetails.directors
                     )
                 }
                 Row() { // Add padding to the Row
@@ -225,9 +226,7 @@ private fun WatchTrailerButton(
 
 @Composable
 private fun DirectorScreenplayMusicRow(
-    director: String,
-    screenplay: String,
-    music: String
+    director: String
 ) {
     Row(modifier = Modifier.padding(top = 32.dp)) {
         TitleValueText(
@@ -238,19 +237,19 @@ private fun DirectorScreenplayMusicRow(
             value = director
         )
 
-        TitleValueText(
-            modifier = Modifier
-                .padding(end = 32.dp)
-                .weight(1f),
-            title = stringResource(R.string.screenplay),
-            value = screenplay
-        )
-
-        TitleValueText(
-            modifier = Modifier.weight(1f),
-            title = stringResource(R.string.music),
-            value = music
-        )
+//        TitleValueText(
+//            modifier = Modifier
+//                .padding(end = 32.dp)
+//                .weight(1f),
+//            title = stringResource(R.string.screenplay),
+//            value = screenplay
+//        )
+//
+//        TitleValueText(
+//            modifier = Modifier.weight(1f),
+//            title = stringResource(R.string.music),
+//            value = music
+//        )
     }
 }
 
@@ -290,7 +289,7 @@ private fun MovieImageWithGradients(
         contentDescription = StringConstants
             .Composable
             .ContentDescription
-            .moviePoster(movieDetails.name),
+            .moviePoster(movieDetails.title),
         contentScale = ContentScale.Crop,
         modifier = modifier.drawWithContent {
             drawContent()

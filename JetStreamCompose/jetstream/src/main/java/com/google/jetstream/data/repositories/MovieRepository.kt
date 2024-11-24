@@ -34,7 +34,5 @@ interface MovieRepository {
     fun getMoviesWithLongThumbnail(): Flow<MovieList>
     fun getMovies(): Flow<MovieList>
     fun getPopularFilmsThisWeek(): Flow<MovieList>
-    fun getTVShows(): Flow<MovieList>
-    fun getBingeWatchDramas(): Flow<MovieList>
     fun getFavouriteMovies(): Flow<MovieList>
 }

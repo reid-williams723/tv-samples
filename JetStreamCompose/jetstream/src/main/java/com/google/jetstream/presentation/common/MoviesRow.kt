@@ -313,7 +313,7 @@ private fun MoviesRowItemText(
             label = "",
         )
         Text(
-            text = movie.name,
+            text = movie.title,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.SemiBold
             ),

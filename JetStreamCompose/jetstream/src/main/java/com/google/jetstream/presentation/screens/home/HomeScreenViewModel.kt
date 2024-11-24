@@ -36,7 +36,7 @@ class HomeScreeViewModel @Inject constructor(
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeScreenUiState> = combine(
-        movieRepository.getFeaturedMovies(),
+        movieRepository.getMovies(),
         showRepository.getShows()
     ) { movieList, showList ->
         HomeScreenUiState.Ready(

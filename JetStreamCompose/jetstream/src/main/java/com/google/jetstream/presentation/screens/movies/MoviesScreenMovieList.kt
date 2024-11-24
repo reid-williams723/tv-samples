@@ -124,7 +124,7 @@ private fun MovieListItem(
                     contentDescription = StringConstants
                         .Composable
                         .ContentDescription
-                        .moviePoster(movie.name),
+                        .moviePoster(movie.title),
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
@@ -134,7 +134,7 @@ private fun MovieListItem(
             title = {
                 Column {
                     Text(
-                        text = movie.description,
+                        text = movie.plot,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Normal
                         ),
@@ -143,7 +143,7 @@ private fun MovieListItem(
                             .padding(start = 24.dp)
                     )
                     Text(
-                        text = movie.name,
+                        text = movie.title,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(
                             start = 24.dp,

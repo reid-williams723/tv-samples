@@ -171,10 +171,10 @@ private fun MovieDescription(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = movie.name, style = MaterialTheme.typography.displaySmall)
+        Text(text = movie.title, style = MaterialTheme.typography.displaySmall)
         Text(
             modifier = Modifier.fillMaxWidth(0.5f),
-            text = movie.description,
+            text = movie.plot,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
             fontWeight = FontWeight.Light

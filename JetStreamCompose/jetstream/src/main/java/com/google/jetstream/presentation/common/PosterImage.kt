@@ -26,6 +26,7 @@ import com.google.jetstream.data.entities.Episode
 import com.google.jetstream.data.entities.Movie
 import com.google.jetstream.data.entities.Show
 import com.google.jetstream.data.util.StringConstants
+import java.io.File
 
 @Composable
 fun PosterImage(
@@ -36,9 +37,9 @@ fun PosterImage(
         modifier = modifier,
         model = ImageRequest.Builder(LocalContext.current)
             .crossfade(true)
-            .data(movie.posterUri)
+            .data(File(movie.posterUri))
             .build(),
-        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(movie.name),
+        contentDescription = StringConstants.Composable.ContentDescription.moviePoster(movie.title),
         contentScale = ContentScale.Crop
     )
 }

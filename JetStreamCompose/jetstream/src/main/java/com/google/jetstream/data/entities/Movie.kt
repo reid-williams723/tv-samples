@@ -22,25 +22,37 @@ data class Movie(
     val id: String,
     val videoUri: String,
     val subtitleUri: String?,
+    val title: String,
+    val fullTitle: String,
+    val year: Int,
+    val releaseDate: String,
     val posterUri: String,
-    val name: String,
-    val description: String,
     val runtimeMins: Int,
+    val runtimeStr: String,
+    val plot: String,
+    val contentRating: String,
+    val genres: List<String>,
+    val directors: String,
+    val stars: String,
 )
 
-fun MoviesResponseItem.toMovie(thumbnailType: ThumbnailType = ThumbnailType.Standard): Movie {
-    val thumbnail = when (thumbnailType) {
-        ThumbnailType.Standard -> image_2_3
-        ThumbnailType.Long -> image_16_9
-    }
+fun MoviesResponseItem.toMovie(parentDirectory: String): Movie {
     return Movie(
         id,
-        videoUri,
-        subtitleUri,
-        thumbnail,
+        parentDirectory + videoUri,
+        parentDirectory + subtitleUri,
         title,
         fullTitle,
-        runtimeMins
+        year,
+        releaseDate,
+        parentDirectory + posterUri,
+        runtimeMins,
+        runtimeStr,
+        plot,
+        contentRating,
+        genres,
+        directors,
+        stars
     )
 }
 

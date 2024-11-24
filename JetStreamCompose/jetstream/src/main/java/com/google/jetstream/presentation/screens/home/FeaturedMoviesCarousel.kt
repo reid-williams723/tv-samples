@@ -186,7 +186,7 @@ private fun CarouselItemForeground(
             verticalArrangement = Arrangement.Bottom
         ) {
             Text(
-                text = movie.name,
+                text = movie.title,
                 style = MaterialTheme.typography.displayMedium.copy(
                     shadow = Shadow(
                         color = Color.Black.copy(alpha = 0.5f),
@@ -197,7 +197,7 @@ private fun CarouselItemForeground(
                 maxLines = 1
             )
             Text(
-                text = movie.description,
+                text = movie.plot,
                 style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.65f
@@ -228,7 +228,7 @@ private fun CarouselItemBackground(movie: Movie, modifier: Modifier = Modifier) 
         contentDescription = StringConstants
             .Composable
             .ContentDescription
-            .moviePoster(movie.name),
+            .moviePoster(movie.title),
         modifier = modifier
             .drawWithContent {
                 drawContent()

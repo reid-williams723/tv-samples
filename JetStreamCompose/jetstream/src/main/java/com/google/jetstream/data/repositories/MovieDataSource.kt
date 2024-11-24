@@ -20,11 +20,13 @@ import com.google.jetstream.data.entities.ThumbnailType
 import com.google.jetstream.data.entities.toMovie
 import com.google.jetstream.data.util.AssetsReader
 import com.google.jetstream.data.util.StringConstants
+import com.google.jetstream.storage.DirectoryProvider
 import javax.inject.Inject
 
 class MovieDataSource @Inject constructor(
     assetsReader: AssetsReader,
-    fileReader: FileReader
+    fileReader: FileReader,
+    directoryProvider: DirectoryProvider
 ) {
     private val top250MovieDataReader = CachedDataReader {
         readMovieData(fileReader, StringConstants.Assets.Top250Movies)
@@ -32,25 +34,25 @@ class MovieDataSource @Inject constructor(
 
     private val mostPopularMovieDataReader = MovieDataReader {
         readMovieData(fileReader, StringConstants.Assets.MostPopularMovies).map {
-            it.toMovie()
+            it.toMovie(parentDirectory = directoryProvider.externalDirectoryPath)
         }
     }
 
     private val movieDataReader = MovieDataReader {
         top250MovieDataReader.read().map {
-            it.toMovie()
+            it.toMovie(parentDirectory = directoryProvider.externalDirectoryPath)
         }
     }
 
     private var movieWithLongThumbnailDataReader: MovieDataReader = CachedDataReader {
         top250MovieDataReader.read().map {
-            it.toMovie(ThumbnailType.Long)
+            it.toMovie(parentDirectory = directoryProvider.externalDirectoryPath)
         }
     }
 
     private val nowPlayingMovieDataReader: MovieDataReader = MovieDataReader {
         readMovieData(fileReader, StringConstants.Assets.InTheaters).subList(0, 10).map {
-            it.toMovie()
+            it.toMovie(parentDirectory = directoryProvider.externalDirectoryPath)
         }
     }
 

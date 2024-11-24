@@ -116,7 +116,7 @@ class VideoPlayerScreenViewModel @Inject constructor(
                         val details = movieRepository.getMovieDetails(movieId = id)
                         val mediaDetails = MediaDetails(
                             details.id,
-                            details.name,
+                            details.fullTitle,
                             details.releaseDate,
                             details.videoUri,
                             details.subtitleUri,
