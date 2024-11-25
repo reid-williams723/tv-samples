@@ -24,9 +24,12 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesomeMotion
 import androidx.compose.material.icons.filled.ClosedCaption
@@ -45,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -80,6 +84,7 @@ import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPla
 import com.google.jetstream.presentation.screens.videoPlayer.components.VideoPlayerState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerPulseState
 import com.google.jetstream.presentation.screens.videoPlayer.components.rememberVideoPlayerState
+import com.google.jetstream.presentation.theme.JetStreamTheme
 import com.google.jetstream.presentation.utils.handleDPadKeyEvents
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -131,7 +136,7 @@ fun VideoPlayerScreen(
     }
 }
 
-@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayerScreenContent(
     mediaType: MediaType,
@@ -183,6 +188,7 @@ fun VideoPlayerScreenContent(
                 pulseState
             )
             .focusable()
+            .background(Color.Black)
     ) {
         AndroidView(
             factory = { context ->
@@ -222,7 +228,7 @@ fun VideoPlayerScreenContent(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(4 / 3f)
+                .aspectRatio(15.99f / 9f)
         )
 
         val focusRequester = remember { FocusRequester() }
